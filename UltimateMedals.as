@@ -52,6 +52,12 @@ bool showAuthorName = false;
 [Setting category="Additional Info" name="Show Map Comment on Hover" description="An 'i' icon will appear next to the map name or author name, if a comment is available."]
 bool showComment = false;
 
+[Setting category="Additional Info" name="Show Personal Best Delta Time"]
+bool showPbestDelta = false;
+
+[Setting category="Additional Info" name="Show Personal Best Negative Delta Time"]
+bool showPbestDeltaNegative = true;
+
 [Setting category="Display Settings" name="Window visible" description="To adjust the position of the window, click and drag while the Openplanet overlay is visible."]
 bool windowVisible = true;
 
@@ -103,6 +109,21 @@ class Record {
   
   string TimeString() {
     return this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---") + "\\$z";
+  }
+  
+  string DeltaString(Record@ other) {
+    if (this is other || other.time <= 0) {
+      return "";
+    }
+
+    int delta = other.time - this.time;
+    if (delta < 0) {
+      if (!showPbestDeltaNegative) {
+        return "";
+      }
+      return "\\$77f-" + Time::Format(delta * -1);
+    }
+    return "\\$f77+" + Time::Format(delta);
   }
   
   int opCmp(Record@ other) {
@@ -200,13 +221,21 @@ void Render() {
       UI::EndTable();
     }
     
-    if(UI::BeginTable("table", 2, UI::TableFlags::SizingFixedFit)) {
+    int numCols = 2;
+    if (showPbestDelta) {
+      numCols = 3;
+    }
+    if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit)) {
       if(showHeader) {
         UI::TableNextRow();
         UI::TableNextColumn();
         UI::Text("Medal");
         UI::TableNextColumn();
         UI::Text("Time");
+        if (showPbestDelta) {
+          UI::TableNextColumn();
+          UI::Text("Delta");
+        }
       }
       
       for(uint i = 0; i < times.Length; i++) {
@@ -229,6 +258,11 @@ void Render() {
 #endif
         UI::TableNextColumn();
         UI::Text(times[i].TimeString());
+
+        if (showPbestDelta) {
+          UI::TableNextColumn();
+          UI::Text(times[i].DeltaString(pbest));
+        }
       }
       
       UI::EndTable();
