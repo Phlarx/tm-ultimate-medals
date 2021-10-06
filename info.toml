@@ -1,0 +1,10 @@
+[meta]
+name = "Ultimate Medals"
+author = "Phlarx"
+category = "Race"
+
+siteid = 118
+version = "1.5.1"
+
+[script]
+imports = [ "Icons.as", "Formatting.as", "Time.as" ]
