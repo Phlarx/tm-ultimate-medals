@@ -158,6 +158,8 @@ array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver
 bool campaignMap = false;
 #endif
 
+int timeWidth = 53;
+int deltaWidth = 60;
 
 
 void RenderMenu() {
@@ -229,11 +231,14 @@ void Render() {
       if(showHeader) {
         UI::TableNextRow();
         UI::TableNextColumn();
+        setMinWidth(0);
         UI::Text("Medal");
         UI::TableNextColumn();
+        setMinWidth(timeWidth);
         UI::Text("Time");
         if (showPbestDelta) {
           UI::TableNextColumn();
+          setMinWidth(deltaWidth);
           UI::Text("Delta");
         }
       }
@@ -284,6 +289,12 @@ void Render() {
     
     UI::End();
   }
+}
+
+void setMinWidth(int width) {
+  UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, 0));
+  UI::Dummy(vec2(width, 0));
+  UI::PopStyleVar();
 }
 
 void Main() {
