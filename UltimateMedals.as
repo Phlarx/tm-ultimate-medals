@@ -184,6 +184,8 @@ void Render() {
     }
   }
   
+  calcMinWidths();
+  
   if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
     if(lockPosition) {
       UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
@@ -286,6 +288,31 @@ void Render() {
 #endif
       UI::EndTooltip();
     }
+    
+    UI::End();
+  }
+}
+
+int calcMinWidthsStep = 0;
+void calcMinWidths() {
+  // Must be called within Render*()
+  // Spawns a window temporarily to calculate item widths
+  // Requires a build frame followed by a measurement frame, for each item
+  // If re-calc is needed, calcMinWidthsStep must be reset to zero
+  if(calcMinWidthsStep < 4) {
+    int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking | UI::WindowFlags::NoInputs | UI::TableFlags::NoSavedSettings;
+    UI::Begin("Ultimate Medals Extra", windowFlags);
+    
+    if(calcMinWidthsStep < 2) {
+      //  0:00.000 -> 53
+      UI::Text("0:00.000");
+      timeWidth = UI::GetWindowContentRegionWidth();
+    } else {
+      // +0:00.000 -> 60
+      UI::Text("+0:00.000");
+      deltaWidth = UI::GetWindowContentRegionWidth();
+    }
+    calcMinWidthsStep += 1;
     
     UI::End();
   }
