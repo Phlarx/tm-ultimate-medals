@@ -357,6 +357,7 @@ void Main() {
         auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
         pbest.time = scoreMgr.Map_GetRecord_v2(network.PlayerInfo.Id, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
         pbest.medal = scoreMgr.Map_GetMedal(network.PlayerInfo.Id, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+      }
 #elif TURBO
       if(network.TmRaceRules !is null) {
         auto dataMgr = network.TmRaceRules.DataMgr;
@@ -373,13 +374,32 @@ void Main() {
             }
           }
         }
+      }
 #elif MP4
-      if(network.TmRaceRules !is null) {
+      // don't use network.ClientManiaAppPlayground.ScoreMgr because that always returns -1
+      if(network.TmRaceRules !is null && network.TmRaceRules.ScoreMgr !is null) {
         auto scoreMgr = network.TmRaceRules.ScoreMgr;
+        // after extensive research, I have concluded that Context must be ""
         pbest.time = scoreMgr.Map_GetRecord(network.PlayerInfo.Id, map.MapInfo.MapUid, "");
         pbest.medal = CalcMedal();
+      } else if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
+        // when playing on a server, TmRaceRules.ScoreMgr is unfortunately inaccessible
+        // this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
+        pbest.time = -1;
+        for(uint i = 0; i < app.ReplayRecordInfos.Length; i++) {
+          if(app.ReplayRecordInfos[i] !is null
+             && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
+             && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
+            auto record = app.ReplayRecordInfos[i];
+            if(pbest.time < 0 || record.BestTime < pbest.time) {
+              pbest.time = record.BestTime;
+            }
+          }
+        }
+        pbest.medal = CalcMedal();
+      }
 #endif
-      } else {
+      else {
         pbest.time = -1;
         pbest.medal = 0;
       }
