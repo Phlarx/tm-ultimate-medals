@@ -391,7 +391,7 @@ void Main() {
              && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
              && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
             auto record = app.ReplayRecordInfos[i];
-            if(pbest.time < 0 || record.BestTime < pbest.time) {
+            if(pbest.time < 0 || record.BestTime < uint(pbest.time)) {
               pbest.time = record.BestTime;
             }
           }
