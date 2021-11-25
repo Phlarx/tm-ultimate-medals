@@ -61,6 +61,9 @@ bool showPbestDeltaNegative = true;
 [Setting category="Display Settings" name="Window visible" description="To adjust the position of the window, click and drag while the Openplanet overlay is visible."]
 bool windowVisible = true;
 
+[Setting category="Display Settings" name="Window visiblility hotkey"]
+VirtualKey windowVisibleKey = VirtualKey(0);
+
 [Setting category="Display Settings" name="Hide on hidden interface"]
 bool hideWithIFace = false;
 
@@ -161,6 +164,17 @@ bool campaignMap = false;
 int timeWidth = 53;
 int deltaWidth = 60;
 
+
+bool held = false;
+bool OnKeyPress(bool down, VirtualKey key)
+{
+	if(key == windowVisibleKey && !held)
+	{
+		windowVisible = !windowVisible;
+	}
+	held = down;
+	return false;
+}
 
 void RenderMenu() {
   if(UI::MenuItem("\\$db4" + Icons::Circle + "\\$z Medals Window", "", windowVisible)) {
@@ -405,7 +419,7 @@ void Main() {
       }
       pbest.hidden = !showPbest;
     
-    } else {
+    } else if(map is null || map.MapInfo.MapUid == "") {
 #if TMNEXT||MP4
       author.time = -5;
 #elif TURBO
