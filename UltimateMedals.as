@@ -132,9 +132,13 @@ class Record {
   int opCmp(Record@ other) {
     // like normal, except consider negatives to be larger than positives
     if((this.time >= 0) == (other.time >= 0)) {
-      return this.time - other.time;
+			// sign(this.time - other.time), but overflow safe
+			int64 diff = int64(this.time) - int64(other.time);
+			return diff == 0 ? 0 : diff > 0 ? 1 : -1;
     } else {
-      return other.time - this.time;
+			// sign(other.time - this.time), but overflow safe
+			int64 diff = int64(other.time) - int64(this.time);
+			return diff == 0 ? 0 : diff > 0 ? 1 : -1;
     }
   }
 }
