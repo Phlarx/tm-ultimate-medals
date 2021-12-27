@@ -287,14 +287,9 @@ void Render() {
 		
 		if(hasComment && showComment && UI::IsItemHovered()) {
 			UI::BeginTooltip();
-#if NEXT
 			UI::PushTextWrapPos(200);
 			UI::TextWrapped(map.MapInfo.Comments);
 			UI::PopTextWrapPos();
-#else
-			// Wrapping currently unavailable for MP4 and TURBO
-			UI::Text(map.MapInfo.Comments);
-#endif
 			UI::EndTooltip();
 		}
 		
