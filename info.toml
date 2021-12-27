@@ -4,7 +4,7 @@ author = "Phlarx"
 category = "Race"
 
 siteid = 118
-version = "1.6.1"
+version = "1.7"
 
 [script]
 imports = [ "Icons.as", "Formatting.as", "Time.as" ]
