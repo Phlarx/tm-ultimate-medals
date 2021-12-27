@@ -326,7 +326,6 @@ void LoadFont() {
 			loadedFontSize = fontSize;
 		}
 	}
-	print('loaded font');
 }
 
 void OnSettingsChanged() {
@@ -343,6 +342,8 @@ void Main() {
 	
 	LoadFont();
 	
+	string currentMapUid = "";
+	
 	while(true) {
 #if TMNEXT||MP4
 		auto map = app.RootMap;
@@ -351,48 +352,52 @@ void Main() {
 #endif
 		
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
+			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
-			author.time = map.TMObjective_AuthorTime;
-			author.hidden = !showAuthor;
+				author.time = map.TMObjective_AuthorTime;
+				author.hidden = !showAuthor;
 #elif TURBO
-			int mapNumber = Text::ParseInt(map.MapName);
-			campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
-			
-			auto super = TurboSTM::GetSuperTime(mapNumber);
-			tmaster.time = map.TMObjective_AuthorTime;
-			tmaster.hidden = !showTmaster;
-			if(super !is null && campaignMap) {
-				// we check campaignMap so that a successful parse on a different map doesn't give a false positive
-				stmaster.time = int(super.m_time);
-				stmaster.hidden = !showStmaster;
-				auto delta = tmaster.time - stmaster.time;
-				sgold.time = stmaster.time + delta/8;
-				sgold.hidden = !showSgold;
-				ssilver.time = stmaster.time + delta/4;
-				ssilver.hidden = !showSsilver;
-				sbronze.time = stmaster.time + delta/2;
-				sbronze.hidden = !showSbronze;
-			} else {
-				stmaster.time = -9;
-				stmaster.hidden = true;
-				sgold.time = -8;
-				sgold.hidden = true;
-				ssilver.time = -7;
-				ssilver.hidden = true;
-				sbronze.time = -6;
-				sbronze.hidden = true;
-			}
+				int mapNumber = Text::ParseInt(map.MapName);
+				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
+				
+				auto super = TurboSTM::GetSuperTime(mapNumber);
+				tmaster.time = map.TMObjective_AuthorTime;
+				tmaster.hidden = !showTmaster;
+				if(super !is null && campaignMap) {
+					// we check campaignMap so that a successful parse on a different map doesn't give a false positive
+					stmaster.time = int(super.m_time);
+					stmaster.hidden = !showStmaster;
+					auto delta = tmaster.time - stmaster.time;
+					sgold.time = stmaster.time + delta/8;
+					sgold.hidden = !showSgold;
+					ssilver.time = stmaster.time + delta/4;
+					ssilver.hidden = !showSsilver;
+					sbronze.time = stmaster.time + delta/2;
+					sbronze.hidden = !showSbronze;
+				} else {
+					stmaster.time = -9;
+					stmaster.hidden = true;
+					sgold.time = -8;
+					sgold.hidden = true;
+					ssilver.time = -7;
+					ssilver.hidden = true;
+					sbronze.time = -6;
+					sbronze.hidden = true;
+				}
 #endif
-			gold.time = map.TMObjective_GoldTime;
-			gold.hidden = !showGold;
-			silver.time = map.TMObjective_SilverTime;
-			silver.hidden = !showSilver;
-			bronze.time = map.TMObjective_BronzeTime;
-			bronze.hidden = !showBronze;
-			
-			pbest.time = -1;
-			pbest.medal = 0;
-			pbest.hidden = !showPbest;
+				gold.time = map.TMObjective_GoldTime;
+				gold.hidden = !showGold;
+				silver.time = map.TMObjective_SilverTime;
+				silver.hidden = !showSilver;
+				bronze.time = map.TMObjective_BronzeTime;
+				bronze.hidden = !showBronze;
+				
+				// prevent 'leaking' a stale PB between maps
+				pbest.time = -1;
+				pbest.medal = 0;
+				
+				currentMapUid = map.MapInfo.MapUid;
+			}
 			
 #if TMNEXT
 			if(network.ClientManiaAppPlayground !is null) {
@@ -441,7 +446,12 @@ void Main() {
 				pbest.medal = CalcMedal();
 			}
 #endif
-		
+			else {
+				pbest.time = -1;
+				pbest.medal = 0;
+			}
+			pbest.hidden = !showPbest;
+			
 		} else if(map is null || map.MapInfo.MapUid == "") {
 #if TMNEXT||MP4
 			author.time = -5;
@@ -457,6 +467,8 @@ void Main() {
 			bronze.time = -2;
 			pbest.time = -1;
 			pbest.medal = 0;
+			
+			currentMapUid = "";
 		}
 		
 		times.SortAsc();
