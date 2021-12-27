@@ -66,6 +66,12 @@ vec2 anchor = vec2(0, 170);
 [Setting category="Display Settings" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
 
+[Setting category="Display Settings" name="Font face"]
+string fontFace = "";
+
+[Setting category="Display Settings" name="Font size" min=8 max=48]
+int fontSize = 16;
+
 
 
 const array<string> medals = {
@@ -161,6 +167,10 @@ bool campaignMap = false;
 int timeWidth = 53;
 int deltaWidth = 60;
 
+string loadedFontFace = "";
+int loadedFontSize = 0;
+Resources::Font@ font = null;
+
 
 bool held = false;
 bool OnKeyPress(bool down, VirtualKey key)
@@ -206,6 +216,8 @@ void Render() {
 		if (!UI::IsOverlayShown()) {
 				windowFlags |= UI::WindowFlags::NoInputs;
 		}
+		
+		UI::PushFont(font);
 		
 		UI::Begin("Ultimate Medals", windowFlags);
 		
@@ -262,7 +274,7 @@ void Render() {
 				UI::TableNextColumn();
 #if TURBO
 				if(5 <= times[i].medal && times[i].medal <= 7) {
-					UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -16)); // 16 is the default font size
+					UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
 					UI::Text(times[i].NameString());
 					UI::Text("\\$0f1" + Icons::CircleO + "\\$z");
 					UI::PopStyleVar();
@@ -294,6 +306,8 @@ void Render() {
 		}
 		
 		UI::End();
+		
+		UI::PopFont();
 	}
 }
 
@@ -303,6 +317,22 @@ void setMinWidth(int width) {
 	UI::PopStyleVar();
 }
 
+void LoadFont() {
+	string fontFaceToLoad = fontFace.Length == 0 ? "DroidSans.ttf" : fontFace;
+	if(fontFaceToLoad != loadedFontFace || fontSize != loadedFontSize) {
+		@font = Resources::GetFont(fontFaceToLoad, fontSize, -1, -1, true, true, true);
+		if(font !is null) {
+			loadedFontFace = fontFaceToLoad;
+			loadedFontSize = fontSize;
+		}
+	}
+	print('loaded font');
+}
+
+void OnSettingsChanged() {
+	LoadFont();
+}
+
 void Main() {
 	auto app = cast<CTrackMania>(GetApp());
 	auto network = cast<CTrackManiaNetwork>(app.Network);
@@ -310,6 +340,8 @@ void Main() {
 #if TURBO
 	TurboSTM::Initialize();
 #endif
+	
+	LoadFont();
 	
 	while(true) {
 #if TMNEXT||MP4
