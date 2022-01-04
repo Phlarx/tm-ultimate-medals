@@ -78,7 +78,7 @@ int fontSize = 16;
 /* Custom names */
 #if TMNEXT||MP4
 [Setting category="Display Text" name="Author Text"]
-bool authorText = true;
+string authorText = "Author";
 
 #elif TURBO
 [Setting category="Display Text" name="Super Trackmaster Text"]
@@ -311,7 +311,9 @@ void Render() {
 				if(5 <= times[i].medal && times[i].medal <= 7) {
 					UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
 					UI::Text(times[i].NameString());
-					UI::Text("\\$0f1" + Icons::CircleO + "\\$z");
+					if (showCircles) {
+						UI::Text("\\$0f1" + Icons::CircleO + "\\$z");
+					}
 					UI::PopStyleVar();
 				} else {
 					UI::Text(times[i].NameString());
@@ -364,29 +366,19 @@ void LoadFont() {
 }
 
 void UpdateText() {
-	array<string> names = {
 #if TMNEXT||MP4
-		authorText,
+	author.name = authorText;
 #elif TURBO
-		stmasterText,
-		sgoldText,
-		ssilverText,
-		sbronzeText,
-		tmasterText,
+	stmaster.name = stmasterText;
+	sgold.name = sgoldText;
+	ssilver.name = ssilverText;
+	sbronze.name = sbronzeText;
 #endif
-		goldText,
-		silverText,
-		bronzeText,
-		pbestText
-	};	
-
-	for(uint i = 0; i < times.Length; i++) {
-		if(times[i].hidden) {
-			continue;
-		}
-
-		times[i].name = names[i];
-	}
+	tmaster.name = tmasterText;
+	gold.name = goldText;
+	silver.name = silverText;
+	bronze.name = bronzeText;
+	pbest.name = pbestText;
 }
 
 void OnSettingsChanged() {
