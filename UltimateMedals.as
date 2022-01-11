@@ -373,8 +373,8 @@ void UpdateText() {
 	sgold.name = sgoldText;
 	ssilver.name = ssilverText;
 	sbronze.name = sbronzeText;
-#endif
 	tmaster.name = tmasterText;
+#endif
 	gold.name = goldText;
 	silver.name = silverText;
 	bronze.name = bronzeText;
