@@ -45,6 +45,9 @@ bool showAuthorName = false;
 [Setting category="Additional Info" name="Show Map Comment on Hover" description="An 'i' icon will appear next to the map name or author name, if a comment is available."]
 bool showComment = false;
 
+[Setting category="Additional Info" name="Show Circles"]
+bool showCircles = true;
+
 [Setting category="Additional Info" name="Show Personal Best Delta Time"]
 bool showPbestDelta = false;
 
@@ -72,7 +75,39 @@ string fontFace = "";
 [Setting category="Display Settings" name="Font size" min=8 max=48]
 int fontSize = 16;
 
+/* Custom names */
+#if TMNEXT||MP4
+[Setting category="Display Text" name="Author Text"]
+string authorText = "Author";
 
+#elif TURBO
+[Setting category="Display Text" name="Super Trackmaster Text"]
+string stmasterText = "S. Trackmaster";
+
+[Setting category="Display Text" name="Super Gold Text"]
+string sgoldText = "S. Gold";
+
+[Setting category="Display Text" name="Super Silver Text"]
+string ssilverText = "S. Silver";
+
+[Setting category="Display Text" name="Super Bronze Text"]
+string sbronzeText = "S. Bronze";
+
+[Setting category="Display Text" name="Trackmaster Text"]
+string tmasterText = "Trackmaster";
+#endif
+
+[Setting category="Display Text" name="Gold Text"]
+string goldText = "Gold";
+
+[Setting category="Display Text" name="Silver Text"]
+string silverText = "Silver";
+
+[Setting category="Display Text" name="Bronze Text"]
+string bronzeText = "Bronze";
+
+[Setting category="Display Text" name="Personal Best Text" description="Override names to be shown in the window."]
+string pbestText = "Pers. Best";
 
 const array<string> medals = {
 	"\\$444" + Icons::Circle + "\\$z", // no medal
@@ -104,9 +139,9 @@ class Record {
 		this.style = style;
 		this.hidden = false;
 	}
-	
+
 	string NameString() {
-		return medals[this.medal] + " " + this.style + this.name + "\\$z";
+		return (showCircles ? medals[this.medal] + " " : "") + this.style + this.name + "\\$z";
 	}
 	
 	string TimeString() {
@@ -143,18 +178,18 @@ class Record {
 }
 
 #if TMNEXT||MP4
-Record@ author = Record("Author", 4, -5);
+Record@ author = Record(authorText, 4, -5);
 #elif TURBO
-Record@ stmaster = Record("S. Trackmaster", 8, -9);
-Record@ sgold = Record("S. Gold", 7, -8);
-Record@ ssilver = Record("S. Silver", 6, -7);
-Record@ sbronze = Record("S. Bronze", 5, -6);
-Record@ tmaster = Record("Trackmaster", 4, -5);
+Record@ stmaster = Record(stmasterText, 8, -9);
+Record@ sgold = Record(sgoldText, 7, -8);
+Record@ ssilver = Record(ssilverText, 6, -7);
+Record@ sbronze = Record(sbronzeText, 5, -6);
+Record@ tmaster = Record(tmasterText, 4, -5);
 #endif
-Record@ gold = Record("Gold", 3, -4);
-Record@ silver = Record("Silver", 2, -3);
-Record@ bronze = Record("Bronze", 1, -2);
-Record@ pbest = Record("Pers. Best", 0, -1, "\\$0ff");
+Record@ gold = Record(goldText, 3, -4);
+Record@ silver = Record(silverText, 2, -3);
+Record@ bronze = Record(bronzeText, 1, -2);
+Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
 
 #if TMNEXT||MP4
 array<Record@> times = {author, gold, silver, bronze, pbest};
@@ -276,7 +311,9 @@ void Render() {
 				if(5 <= times[i].medal && times[i].medal <= 7) {
 					UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
 					UI::Text(times[i].NameString());
-					UI::Text("\\$0f1" + Icons::CircleO + "\\$z");
+					if (showCircles) {
+						UI::Text("\\$0f1" + Icons::CircleO + "\\$z");
+					}
 					UI::PopStyleVar();
 				} else {
 					UI::Text(times[i].NameString());
@@ -328,8 +365,25 @@ void LoadFont() {
 	}
 }
 
+void UpdateText() {
+#if TMNEXT||MP4
+	author.name = authorText;
+#elif TURBO
+	stmaster.name = stmasterText;
+	sgold.name = sgoldText;
+	ssilver.name = ssilverText;
+	sbronze.name = sbronzeText;
+	tmaster.name = tmasterText;
+#endif
+	gold.name = goldText;
+	silver.name = silverText;
+	bronze.name = bronzeText;
+	pbest.name = pbestText;
+}
+
 void OnSettingsChanged() {
 	LoadFont();
+	UpdateText();
 }
 
 void Main() {
@@ -341,6 +395,7 @@ void Main() {
 #endif
 	
 	LoadFont();
+	UpdateText();
 	
 	string currentMapUid = "";
 	
