@@ -69,10 +69,10 @@ vec2 anchor = vec2(0, 170);
 [Setting category="Display Settings" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
 
-[Setting category="Display Settings" name="Font face"]
+[Setting category="Display Settings" name="Font face" description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
 string fontFace = "";
 
-[Setting category="Display Settings" name="Font size" min=8 max=48]
+[Setting category="Display Settings" name="Font size" min=8 max=48 description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
 int fontSize = 16;
 
 /* Custom names */
@@ -397,7 +397,7 @@ void UpdateText() {
 }
 
 void OnSettingsChanged() {
-	LoadFont();
+	//LoadFont(); // Disabled dynamic font changes due to memory leak. See issue https://github.com/Phlarx/tm-ultimate-medals/issues/17
 	UpdateText();
 }
 
