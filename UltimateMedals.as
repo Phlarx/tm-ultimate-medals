@@ -45,8 +45,8 @@ bool showAuthorName = false;
 [Setting category="Additional Info" name="Show Map Comment on Hover" description="An 'i' icon will appear next to the map name or author name, if a comment is available."]
 bool showComment = false;
 
-[Setting category="Additional Info" name="Show Circles"]
-bool showCircles = true;
+[Setting category="Additional Info" name="Show Medal Icons"]
+bool showMedalIcons = true;
 
 [Setting category="Additional Info" name="Show Personal Best Delta Time"]
 bool showPbestDelta = false;
@@ -110,18 +110,18 @@ string bronzeText = "Bronze";
 string pbestText = "Pers. Best";
 
 const array<string> medals = {
-	"\\$444" + Icons::Circle + "\\$z", // no medal
-	"\\$964" + Icons::Circle + "\\$z", // bronze medal
-	"\\$899" + Icons::Circle + "\\$z", // silver medal
-	"\\$db4" + Icons::Circle + "\\$z", // gold medal
+	"\\$444" + Icons::Circle, // no medal
+	"\\$964" + Icons::Circle, // bronze medal
+	"\\$899" + Icons::Circle, // silver medal
+	"\\$db4" + Icons::Circle, // gold medal
 #if TMNEXT||MP4
-	"\\$071" + Icons::Circle + "\\$z", // author medal
+	"\\$071" + Icons::Circle, // author medal
 #elif TURBO
-	"\\$0f1" + Icons::Circle + "\\$z", // trackmaster medal
-	"\\$964" + Icons::Circle + "\\$z", // super bronze medal
-	"\\$899" + Icons::Circle + "\\$z", // super silver medal
-	"\\$db4" + Icons::Circle + "\\$z", // super gold medal
-	"\\$0ff" + Icons::Circle + "\\$z", // super trackmaster medal
+	"\\$0f1" + Icons::Circle, // trackmaster medal
+	"\\$964" + Icons::Circle, // super bronze medal
+	"\\$899" + Icons::Circle, // super silver medal
+	"\\$db4" + Icons::Circle, // super gold medal
+	"\\$0ff" + Icons::Circle, // super trackmaster medal
 #endif
 };
 
@@ -140,27 +140,40 @@ class Record {
 		this.hidden = false;
 	}
 
-	string NameString() {
-		return (showCircles ? medals[this.medal] + " " : "") + this.style + this.name + "\\$z";
+	void DrawIcon() {
+#if TURBO
+		if(5 <= times[i].medal && times[i].medal <= 7) {
+			UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
+			UI::Text(medals[this.medal]);
+			UI::Text("\\$0f1" + Icons::CircleO);
+			UI::PopStyleVar();
+		} else {
+			UI::Text(medals[this.medal]);
+		}
+#else
+		UI::Text(medals[this.medal]);
+#endif
+	}
+
+	void DrawName() {
+		UI::Text(this.style + this.name);
 	}
 	
-	string TimeString() {
-		return this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---") + "\\$z";
+	void DrawTime() {
+		UI::Text(this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---"));
 	}
 	
-	string DeltaString(Record@ other) {
+	void DrawDelta(Record@ other) {
 		if (this is other || other.time <= 0) {
-			return "";
+			return;
 		}
 
 		int delta = other.time - this.time;
-		if (delta < 0) {
-			if (!showPbestDeltaNegative) {
-				return "";
-			}
-			return "\\$77f-" + Time::Format(delta * -1);
+		if (delta < 0 && showPbestDeltaNegative) {
+			UI::Text("\\$77f-" + Time::Format(delta * -1));
+		} else if (delta >= 0) {
+			UI::Text("\\$f77+" + Time::Format(delta));
 		}
-		return "\\$f77+" + Time::Format(delta);
 	}
 	
 	int opCmp(Record@ other) {
@@ -268,32 +281,40 @@ void Render() {
 				UI::TableNextRow();
 				UI::TableNextColumn();
 #if TURBO
-				UI::Text((campaignMap ? "#" : "") + StripFormatCodes(map.MapInfo.Name) + (hasComment && !showAuthorName ? " \\$68f" + Icons::InfoCircle + "\\$z" : ""));
+				UI::Text((campaignMap ? "#" : "") + StripFormatCodes(map.MapInfo.Name) + (hasComment && !showAuthorName ? " \\$68f" + Icons::InfoCircle : ""));
 #else
-				UI::Text(StripFormatCodes(map.MapInfo.Name) + (hasComment && !showAuthorName ? " \\$68f" + Icons::InfoCircle + "\\$z" : ""));
+				UI::Text(StripFormatCodes(map.MapInfo.Name) + (hasComment && !showAuthorName ? " \\$68f" + Icons::InfoCircle : ""));
 #endif
 			}
 			if(showAuthorName) {
 				UI::TableNextRow();
 				UI::TableNextColumn();
-				UI::Text("\\$888by " + map.MapInfo.AuthorNickName + (hasComment ? " \\$68f" + Icons::InfoCircle : "") + "\\$z");
+				UI::Text("\\$888by " + map.MapInfo.AuthorNickName + (hasComment ? " \\$68f" + Icons::InfoCircle : ""));
 			}
 			UI::EndTable();
 		}
 		
-		int numCols = 2;
-		if (showPbestDelta) {
-			numCols = 3;
-		}
+		int numCols = 2; // name and time columns are always shown
+		if(showMedalIcons) numCols++;
+		if(showPbestDelta) numCols++;
+		
 		if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit)) {
 			if(showHeader) {
 				UI::TableNextRow();
+				
+				if (showMedalIcons) {
+					UI::TableNextColumn();
+					// Medal icon has no header text
+				}
+				
 				UI::TableNextColumn();
 				setMinWidth(0);
 				UI::Text("Medal");
+				
 				UI::TableNextColumn();
 				setMinWidth(timeWidth);
 				UI::Text("Time");
+				
 				if (showPbestDelta) {
 					UI::TableNextColumn();
 					setMinWidth(deltaWidth);
@@ -306,27 +327,21 @@ void Render() {
 					continue;
 				}
 				UI::TableNextRow();
-				UI::TableNextColumn();
-#if TURBO
-				if(5 <= times[i].medal && times[i].medal <= 7) {
-					UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
-					UI::Text(times[i].NameString());
-					if (showCircles) {
-						UI::Text("\\$0f1" + Icons::CircleO + "\\$z");
-					}
-					UI::PopStyleVar();
-				} else {
-					UI::Text(times[i].NameString());
+				
+				if(showMedalIcons) {
+					UI::TableNextColumn();
+					times[i].DrawIcon();
 				}
-#else
-				UI::Text(times[i].NameString());
-#endif
+				
 				UI::TableNextColumn();
-				UI::Text(times[i].TimeString());
+				times[i].DrawName();
+				
+				UI::TableNextColumn();
+				times[i].DrawTime();
 
 				if (showPbestDelta) {
 					UI::TableNextColumn();
-					UI::Text(times[i].DeltaString(pbest));
+					times[i].DrawDelta(pbest);
 				}
 			}
 			
