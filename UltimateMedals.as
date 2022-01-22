@@ -142,7 +142,7 @@ class Record {
 
 	void DrawIcon() {
 #if TURBO
-		if(5 <= times[i].medal && times[i].medal <= 7) {
+		if(5 <= this.medal && this.medal <= 7) {
 			UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
 			UI::Text(medals[this.medal]);
 			UI::Text("\\$0f1" + Icons::CircleO);
