@@ -132,7 +132,7 @@ class Record {
 	string style;
 	bool hidden;
 	
-	Record(string name = "Unknown", uint medal = 0, int time = -1, string style = "\\$fff") {
+	Record(string &in name = "Unknown", uint medal = 0, int time = -1, string &in style = "\\$fff") {
 		this.name = name;
 		this.medal = medal;
 		this.time = time;
