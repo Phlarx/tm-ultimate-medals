@@ -246,11 +246,8 @@ void Render() {
 	auto map = app.Challenge;
 #endif
 	
-	if(hideWithIFace) {
-		auto playground = app.CurrentPlayground;
-		if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
-			return;
-		}
+	if(hideWithIFace && !UI::IsGameUIVisible()) {
+		return;
 	}
 	
 	if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
