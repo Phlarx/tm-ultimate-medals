@@ -471,9 +471,20 @@ void Main() {
 			
 #if TMNEXT
 			if(network.ClientManiaAppPlayground !is null) {
+				auto userMgr = network.ClientManiaAppPlayground.UserMgr;
+				MwId userId;
+				if (userMgr.Users.Length > 0) {
+					userId = userMgr.Users[0].Id;
+				} else {
+					userId.Value = uint(-1);
+				}
+				
 				auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
-				pbest.time = scoreMgr.Map_GetRecord_v2(network.PlayerInfo.Id, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-				pbest.medal = scoreMgr.Map_GetMedal(network.PlayerInfo.Id, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+				// from: OpenplanetNext\Extract\Titles\Trackmania\Scripts\Libs\Nadeo\TMNext\TrackMania\Menu\Constants.Script.txt
+				// ScopeType can be: "Season", "PersonalBest"
+				// GameMode can be: "TimeAttack", "Follow", "ClashTime"
+				pbest.time = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+				pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
 			}
 #elif TURBO
 			if(network.TmRaceRules !is null) {
