@@ -377,6 +377,23 @@ void LoadFont() {
 	}
 }
 
+void UpdateHidden() {
+#if TMNEXT||MP4
+	author.hidden = !showAuthor;
+#elif TURBO
+	// If no super times, never show them
+	stmaster.hidden = !showStmaster || stmaster.time < 0;
+	sgold.hidden = !showSgold || stmaster.time < 0;
+	ssilver.hidden = !showSsilver || stmaster.time < 0;
+	sbronze.hidden = !showSbronze || stmaster.time < 0;
+	tmaster.hidden = !showTmaster;
+#endif
+	gold.hidden = !showGold;
+	silver.hidden = !showSilver;
+	bronze.hidden = !showBronze;
+	pbest.hidden = !showPbest;
+}
+
 void UpdateText() {
 #if TMNEXT||MP4
 	author.name = authorText;
@@ -395,6 +412,7 @@ void UpdateText() {
 
 void OnSettingsChanged() {
 	//LoadFont(); // Disabled dynamic font changes due to memory leak. See issue https://github.com/Phlarx/tm-ultimate-medals/issues/17
+	UpdateHidden();
 	UpdateText();
 }
 
@@ -407,6 +425,7 @@ void Main() {
 #endif
 	
 	LoadFont();
+	UpdateHidden();
 	UpdateText();
 	
 	string currentMapUid = "";
@@ -422,48 +441,37 @@ void Main() {
 			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
 				author.time = map.TMObjective_AuthorTime;
-				author.hidden = !showAuthor;
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
 				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
 				
 				auto super = TurboSTM::GetSuperTime(mapNumber);
 				tmaster.time = map.TMObjective_AuthorTime;
-				tmaster.hidden = !showTmaster;
 				if(super !is null && campaignMap) {
 					// we check campaignMap so that a successful parse on a different map doesn't give a false positive
 					stmaster.time = int(super.m_time);
-					stmaster.hidden = !showStmaster;
 					auto delta = tmaster.time - stmaster.time;
 					sgold.time = stmaster.time + delta/8;
-					sgold.hidden = !showSgold;
 					ssilver.time = stmaster.time + delta/4;
-					ssilver.hidden = !showSsilver;
 					sbronze.time = stmaster.time + delta/2;
-					sbronze.hidden = !showSbronze;
 				} else {
 					stmaster.time = -9;
-					stmaster.hidden = true;
 					sgold.time = -8;
-					sgold.hidden = true;
 					ssilver.time = -7;
-					ssilver.hidden = true;
 					sbronze.time = -6;
-					sbronze.hidden = true;
 				}
 #endif
 				gold.time = map.TMObjective_GoldTime;
-				gold.hidden = !showGold;
 				silver.time = map.TMObjective_SilverTime;
-				silver.hidden = !showSilver;
 				bronze.time = map.TMObjective_BronzeTime;
-				bronze.hidden = !showBronze;
 				
 				// prevent 'leaking' a stale PB between maps
 				pbest.time = -1;
 				pbest.medal = 0;
 				
 				currentMapUid = map.MapInfo.MapUid;
+				
+				UpdateHidden();
 			}
 			
 #if TMNEXT
@@ -528,7 +536,6 @@ void Main() {
 				pbest.time = -1;
 				pbest.medal = 0;
 			}
-			pbest.hidden = !showPbest;
 			
 		} else if(map is null || map.MapInfo.MapUid == "") {
 #if TMNEXT||MP4
