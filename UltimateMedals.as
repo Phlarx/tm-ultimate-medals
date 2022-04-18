@@ -1,4 +1,3 @@
-
 [Setting category="Medals" name="Show Header"]
 bool showHeader = true;
 
@@ -286,7 +285,7 @@ void Render() {
 			if(showAuthorName) {
 				UI::TableNextRow();
 				UI::TableNextColumn();
-				UI::Text("\\$888by " + map.MapInfo.AuthorNickName + (hasComment ? " \\$68f" + Icons::InfoCircle : ""));
+				UI::Text("\\$888by " + StripFormatCodes(map.MapInfo.AuthorNickName) + (hasComment ? " \\$68f" + Icons::InfoCircle : ""));
 			}
 			UI::EndTable();
 		}
