@@ -514,22 +514,39 @@ void Main() {
 				// after extensive research, I have concluded that Context must be ""
 				pbest.time = scoreMgr.Map_GetRecord(network.PlayerInfo.Id, map.MapInfo.MapUid, "");
 				pbest.medal = CalcMedal();
-			} else if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
+			} else if(true) { // yes, this overrides the `else` below
+				int score = -1;
+				
 				// when playing on a server, TmRaceRules.ScoreMgr is unfortunately inaccessible
-				// this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
-				pbest.time = -1;
-				for(uint i = 0; i < app.ReplayRecordInfos.Length; i++) {
-					if(app.ReplayRecordInfos[i] !is null
-						 && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
-						 && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
-						auto record = app.ReplayRecordInfos[i];
-						if(pbest.time < 0 || record.BestTime < uint(pbest.time)) {
-							pbest.time = record.BestTime;
+				if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
+					// this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
+					for(uint i = 0; i < app.ReplayRecordInfos.Length; i++) {
+						if(app.ReplayRecordInfos[i] !is null
+							 && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
+							 && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
+							print('hey ' + tostring(i));
+							auto record = app.ReplayRecordInfos[i];
+							if(score < 0 || record.BestTime < uint(score)) {
+								score = int(record.BestTime);
+							}
 						}
+						// to prevent lag spikes when updating medals, scan at most 256 per tick
+						if(i & 0xff == 0xff) { yield(); }
 					}
-					// to prevent lag spikes when updating medals, scan at most 256 per tick
-					if(i & 0xff == 0xff) yield();
 				}
+				
+				/* this is session-best, check this as well */
+				if(app.CurrentPlayground !is null
+						&& app.CurrentPlayground.GameTerminals.Length > 0
+						&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer) !is null
+						&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score !is null) {
+					int sessScore = int(cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score.BestTime);
+					if(sessScore > 0 && (score < 0 || sessScore < score)) {
+						score = sessScore;
+					}
+				}
+				
+				pbest.time = score;
 				pbest.medal = CalcMedal();
 			}
 #endif
