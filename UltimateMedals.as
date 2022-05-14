@@ -503,6 +503,7 @@ void Main() {
 							pbest.medal = CalcMedal();
 							break;
 						}
+						// this shouldn't loop more than a few times, since each entry is a different record type
 					}
 				}
 			}
@@ -526,6 +527,8 @@ void Main() {
 							pbest.time = record.BestTime;
 						}
 					}
+					// to prevent lag spikes when updating medals, scan at most 256 per tick
+					if(i & 0xff == 0xff) yield();
 				}
 				pbest.medal = CalcMedal();
 			}
