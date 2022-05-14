@@ -220,14 +220,13 @@ Resources::Font@ font = null;
 
 
 bool held = false;
-bool OnKeyPress(bool down, VirtualKey key)
+void OnKeyPress(bool down, VirtualKey key)
 {
 	if(key == windowVisibleKey && !held)
 	{
 		windowVisible = !windowVisible;
 	}
 	held = down;
-	return false;
 }
 
 void RenderMenu() {
