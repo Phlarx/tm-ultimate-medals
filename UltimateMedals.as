@@ -216,7 +216,7 @@ int deltaWidth = 60;
 
 string loadedFontFace = "";
 int loadedFontSize = 0;
-Resources::Font@ font = null;
+UI::Font@ font = null;
 
 
 bool held = false;
@@ -367,7 +367,7 @@ void setMinWidth(int width) {
 void LoadFont() {
 	string fontFaceToLoad = fontFace.Length == 0 ? "DroidSans.ttf" : fontFace;
 	if(fontFaceToLoad != loadedFontFace || fontSize != loadedFontSize) {
-		@font = Resources::GetFont(fontFaceToLoad, fontSize, -1, -1, true, true, true);
+		@font = UI::LoadFont(fontFaceToLoad, fontSize, -1, -1, true, true, true);
 		if(font !is null) {
 			loadedFontFace = fontFaceToLoad;
 			loadedFontSize = fontSize;
