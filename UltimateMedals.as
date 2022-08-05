@@ -5,6 +5,20 @@ bool showHeader = true;
 bool showPbest = true;
 
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+[Setting category="Medals" name="Show Champion"]
+bool showChampion = true;
+#endif
+#if DEPENDENCY_SUPERMEDALS
+[Setting category="Medals" name="Show Super Gold"]
+bool showSgold = false;
+
+[Setting category="Medals" name="Show Super Silver"]
+bool showSsilver = false;
+
+[Setting category="Medals" name="Show Super Bronze"]
+bool showSbronze = false;
+#endif
 [Setting category="Medals" name="Show Author"]
 bool showAuthor = true;
 
@@ -76,6 +90,20 @@ int fontSize = 16;
 
 /* Custom names */
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+[Setting category="Display Text" name="Champion Text"]
+string championText = "Champion";
+#endif
+#if DEPENDENCY_SUPERMEDALS
+[Setting category="Display Text" name="Super Gold Text"]
+string sgoldText = "S. Gold";
+
+[Setting category="Display Text" name="Super Silver Text"]
+string ssilverText = "S. Silver";
+
+[Setting category="Display Text" name="Super Bronze Text"]
+string sbronzeText = "S. Bronze";
+#endif
 [Setting category="Display Text" name="Author Text"]
 string authorText = "Author";
 
@@ -115,6 +143,14 @@ const array<string> medals = {
 	"\\$db4" + Icons::Circle, // gold medal
 #if TMNEXT||MP4
 	"\\$071" + Icons::Circle, // author medal
+#if DEPENDENCY_SUPERMEDALS
+    "\\$964" + Icons::Circle, // super bronze medal
+	"\\$899" + Icons::Circle, // super silver medal
+	"\\$db4" + Icons::Circle, // super gold medal
+#endif
+#if DEPENDENCY_CHAMPIONMEDALS
+    "\\$d35" + Icons::Circle, // champion medal
+#endif
 #elif TURBO
 	"\\$0f1" + Icons::Circle, // trackmaster medal
 	"\\$964" + Icons::Circle, // super bronze medal
@@ -130,7 +166,7 @@ class Record {
 	int time;
 	string style;
 	bool hidden;
-	
+
 	Record(string &in name = "Unknown", uint medal = 0, int time = -1, string &in style = "\\$fff") {
 		this.name = name;
 		this.medal = medal;
@@ -157,11 +193,11 @@ class Record {
 	void DrawName() {
 		UI::Text(this.style + this.name);
 	}
-	
+
 	void DrawTime() {
 		UI::Text(this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---"));
 	}
-	
+
 	void DrawDelta(Record@ other) {
 		if (this is other || other.time <= 0) {
 			return;
@@ -174,7 +210,7 @@ class Record {
 			UI::Text("\\$f77+" + Time::Format(delta));
 		}
 	}
-	
+
 	int opCmp(Record@ other) {
 		// like normal, except consider negatives to be larger than positives
 		if((this.time >= 0) == (other.time >= 0)) {
@@ -190,6 +226,14 @@ class Record {
 }
 
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+Record@ champion = Record(championText, medals.Find("\\$d35" + Icons::Circle), -9);
+#endif
+#if DEPENDENCY_SUPERMEDALS
+Record@ sgold = Record(sgoldText, medals.Find("\\$db4" + Icons::Circle), -8);
+Record@ ssilver = Record(ssilverText, medals.Find("\\$899" + Icons::Circle), -7);
+Record@ sbronze = Record(sbronzeText, medals.Find("\\$964" + Icons::Circle), -6);
+#endif
 Record@ author = Record(authorText, 4, -5);
 #elif TURBO
 Record@ stmaster = Record(stmasterText, 8, -9);
@@ -204,7 +248,15 @@ Record@ bronze = Record(bronzeText, 1, -2);
 Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
 
 #if TMNEXT||MP4
-array<Record@> times = {author, gold, silver, bronze, pbest};
+array<Record@> times = {
+#if DEPENDENCY_CHAMPIONMEDALS
+    champion,
+#endif
+#if DEPENDENCY_SUPERMEDALS
+    sgold, ssilver, sbronze,
+#endif
+    author, gold, silver, bronze, pbest
+};
 #elif TURBO
 array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver, bronze, pbest};
 
@@ -237,39 +289,39 @@ void RenderMenu() {
 
 void Render() {
 	auto app = cast<CTrackMania>(GetApp());
-	
+
 #if TMNEXT||MP4
 	auto map = app.RootMap;
 #elif TURBO
 	auto map = app.Challenge;
 #endif
-	
+
 	if(hideWithIFace && !UI::IsGameUIVisible()) {
 		return;
 	}
-	
+
 	if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 		if(lockPosition) {
 			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
 		} else {
 			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::FirstUseEver);
 		}
-		
+
 		int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
 		if (!UI::IsOverlayShown()) {
 				windowFlags |= UI::WindowFlags::NoInputs;
 		}
-		
+
 		UI::PushFont(font);
-		
+
 		UI::Begin("Ultimate Medals", windowFlags);
-		
+
 		if(!lockPosition) {
 			anchor = UI::GetWindowPos();
 		}
-		
+
 		bool hasComment = string(map.MapInfo.Comments).Length > 0;
-		
+
 		UI::BeginGroup();
 		if((showMapName || showAuthorName) && UI::BeginTable("header", 1, UI::TableFlags::SizingFixedFit)) {
 			if(showMapName) {
@@ -288,49 +340,49 @@ void Render() {
 			}
 			UI::EndTable();
 		}
-		
+
 		int numCols = 2; // name and time columns are always shown
 		if(showMedalIcons) numCols++;
 		if(showPbestDelta) numCols++;
-		
+
 		if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit)) {
 			if(showHeader) {
 				UI::TableNextRow();
-				
+
 				if (showMedalIcons) {
 					UI::TableNextColumn();
 					// Medal icon has no header text
 				}
-				
+
 				UI::TableNextColumn();
 				setMinWidth(0);
 				UI::Text("Medal");
-				
+
 				UI::TableNextColumn();
 				setMinWidth(timeWidth);
 				UI::Text("Time");
-				
+
 				if (showPbestDelta) {
 					UI::TableNextColumn();
 					setMinWidth(deltaWidth);
 					UI::Text("Delta");
 				}
 			}
-			
+
 			for(uint i = 0; i < times.Length; i++) {
 				if(times[i].hidden) {
 					continue;
 				}
 				UI::TableNextRow();
-				
+
 				if(showMedalIcons) {
 					UI::TableNextColumn();
 					times[i].DrawIcon();
 				}
-				
+
 				UI::TableNextColumn();
 				times[i].DrawName();
-				
+
 				UI::TableNextColumn();
 				times[i].DrawTime();
 
@@ -339,11 +391,11 @@ void Render() {
 					times[i].DrawDelta(pbest);
 				}
 			}
-			
+
 			UI::EndTable();
 		}
 		UI::EndGroup();
-		
+
 		if(hasComment && showComment && UI::IsItemHovered()) {
 			UI::BeginTooltip();
 			UI::PushTextWrapPos(200);
@@ -351,9 +403,9 @@ void Render() {
 			UI::PopTextWrapPos();
 			UI::EndTooltip();
 		}
-		
+
 		UI::End();
-		
+
 		UI::PopFont();
 	}
 }
@@ -377,6 +429,14 @@ void LoadFont() {
 
 void UpdateHidden() {
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+    champion.hidden = !showChampion;
+#endif
+#if DEPENDENCY_SUPERMEDALS
+    sgold.hidden = !showSgold;
+	ssilver.hidden = !showSsilver;
+	sbronze.hidden = !showSbronze;
+#endif
 	author.hidden = !showAuthor;
 #elif TURBO
 	// If no super times, never show them
@@ -394,6 +454,14 @@ void UpdateHidden() {
 
 void UpdateText() {
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+    champion.name = championText;
+#endif
+#if DEPENDENCY_SUPERMEDALS
+    sgold.name = sgoldText;
+	ssilver.name = ssilverText;
+	sbronze.name = sbronzeText;
+#endif
 	author.name = authorText;
 #elif TURBO
 	stmaster.name = stmasterText;
@@ -417,32 +485,40 @@ void OnSettingsChanged() {
 void Main() {
 	auto app = cast<CTrackMania>(GetApp());
 	auto network = cast<CTrackManiaNetwork>(app.Network);
-	
+
 #if TURBO
 	TurboSTM::Initialize();
 #endif
-	
+
 	LoadFont();
 	UpdateHidden();
 	UpdateText();
-	
+
 	string currentMapUid = "";
-	
+
 	while(true) {
 #if TMNEXT||MP4
 		auto map = app.RootMap;
 #elif TURBO
 		auto map = app.Challenge;
 #endif
-		
+
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+                champion.time = ChampionMedals::GetCMTime();
+#endif
+#if DEPENDENCY_SUPERMEDALS
+                sgold.time = SuperMedals::GetSGoldTime();
+                ssilver.time = SuperMedals::GetSSilverTime();
+                sbronze.time = SuperMedals::GetSBronzeTime();
+#endif
 				author.time = map.TMObjective_AuthorTime;
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
 				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
-				
+
 				auto super = TurboSTM::GetSuperTime(mapNumber);
 				tmaster.time = map.TMObjective_AuthorTime;
 				if(super !is null && campaignMap) {
@@ -462,16 +538,16 @@ void Main() {
 				gold.time = map.TMObjective_GoldTime;
 				silver.time = map.TMObjective_SilverTime;
 				bronze.time = map.TMObjective_BronzeTime;
-				
+
 				// prevent 'leaking' a stale PB between maps
 				pbest.time = -1;
 				pbest.medal = 0;
-				
+
 				currentMapUid = map.MapInfo.MapUid;
-				
+
 				UpdateHidden();
 			}
-			
+
 #if TMNEXT
 			if(network.ClientManiaAppPlayground !is null) {
 				auto userMgr = network.ClientManiaAppPlayground.UserMgr;
@@ -481,7 +557,7 @@ void Main() {
 				} else {
 					userId.Value = uint(-1);
 				}
-				
+
 				auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
 				// from: OpenplanetNext\Extract\Titles\Trackmania\Scripts\Libs\Nadeo\TMNext\TrackMania\Menu\Constants.Script.txt
 				// ScopeType can be: "Season", "PersonalBest"
@@ -516,7 +592,7 @@ void Main() {
 				pbest.medal = CalcMedal();
 			} else if(true) { // yes, this overrides the `else` below
 				int score = -1;
-				
+
 				// when playing on a server, TmRaceRules.ScoreMgr is unfortunately inaccessible
 				if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
 					// this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
@@ -534,7 +610,7 @@ void Main() {
 						if(i & 0xff == 0xff) { yield(); }
 					}
 				}
-				
+
 				/* this is session-best, check this as well */
 				if(app.CurrentPlayground !is null
 						&& app.CurrentPlayground.GameTerminals.Length > 0
@@ -545,7 +621,7 @@ void Main() {
 						score = sessScore;
 					}
 				}
-				
+
 				pbest.time = score;
 				pbest.medal = CalcMedal();
 			}
@@ -554,9 +630,17 @@ void Main() {
 				pbest.time = -1;
 				pbest.medal = 0;
 			}
-			
+
 		} else if(map is null || map.MapInfo.MapUid == "") {
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+            champion.time = -9;
+#endif
+#if DEPENDENCY_SUPERMEDALS
+            sgold.time = -8;
+            ssilver.time = -7;
+            sbronze.time = -6;
+#endif
 			author.time = -5;
 #elif TURBO
 			stmaster.time = -9;
@@ -570,12 +654,12 @@ void Main() {
 			bronze.time = -2;
 			pbest.time = -1;
 			pbest.medal = 0;
-			
+
 			currentMapUid = "";
 		}
-		
+
 		times.SortAsc();
-		
+
 		sleep(500);
 	}
 }

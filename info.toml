@@ -8,3 +8,4 @@ version = "1.10.1"
 
 [script]
 imports = [ "Icons.as", "Formatting.as", "Time.as" ]
+optional_dependencies = [ "SuperMedals", "ChampionMedals" ]
