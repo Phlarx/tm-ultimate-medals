@@ -430,12 +430,12 @@ void LoadFont() {
 void UpdateHidden() {
 #if TMNEXT||MP4
 #if DEPENDENCY_CHAMPIONMEDALS
-    champion.hidden = !showChampion;
+    champion.hidden = !showChampion || champion.time <= 0;
 #endif
 #if DEPENDENCY_SUPERMEDALS
-    sgold.hidden = !showSgold;
-	ssilver.hidden = !showSsilver;
-	sbronze.hidden = !showSbronze;
+    sgold.hidden = !showSgold || sgold.time <= 0;
+	ssilver.hidden = !showSsilver || ssilver.time <= 0;
+	sbronze.hidden = !showSbronze || sbronze.time <= 0;
 #endif
 	author.hidden = !showAuthor;
 #elif TURBO
