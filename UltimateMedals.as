@@ -144,9 +144,9 @@ const array<string> medals = {
 #if TMNEXT||MP4
 	"\\$071" + Icons::Circle, // author medal
 #if DEPENDENCY_SUPERMEDALS
-    "\\$964" + Icons::Circle, // super bronze medal
-	"\\$899" + Icons::Circle, // super silver medal
-	"\\$db4" + Icons::Circle, // super gold medal
+    "\\$964" + Icons::Kenney::ButtonCircle, // super bronze medal
+	"\\$899" + Icons::Kenney::ButtonCircle, // super silver medal
+	"\\$db4" + Icons::Kenney::ButtonCircle, // super gold medal
 #endif
 #if DEPENDENCY_CHAMPIONMEDALS
     "\\$d35" + Icons::Circle, // champion medal
@@ -230,9 +230,9 @@ class Record {
 Record@ champion = Record(championText, medals.Find("\\$d35" + Icons::Circle), -9);
 #endif
 #if DEPENDENCY_SUPERMEDALS
-Record@ sgold = Record(sgoldText, medals.Find("\\$db4" + Icons::Circle), -8);
-Record@ ssilver = Record(ssilverText, medals.Find("\\$899" + Icons::Circle), -7);
-Record@ sbronze = Record(sbronzeText, medals.Find("\\$964" + Icons::Circle), -6);
+Record@ sgold = Record(sgoldText, medals.Find("\\$db4" + Icons::Kenney::ButtonCircle), -8);
+Record@ ssilver = Record(ssilverText, medals.Find("\\$899" + Icons::Kenney::ButtonCircle), -7);
+Record@ sbronze = Record(sbronzeText, medals.Find("\\$964" + Icons::Kenney::ButtonCircle), -6);
 #endif
 Record@ author = Record(authorText, 4, -5);
 #elif TURBO
