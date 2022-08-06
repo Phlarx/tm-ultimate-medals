@@ -563,7 +563,23 @@ void Main() {
 				// ScopeType can be: "Season", "PersonalBest"
 				// GameMode can be: "TimeAttack", "Follow", "ClashTime"
 				pbest.time = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+#if DEPENDENCY_CHAMPIONMEDALS
+                if (pbest.time <= champion.time) {
+                    pbest.medal = 8;
+#if DEPENDENCY_SUPERMEDALS
+                } else if (pbest.time <= sgold.time) {
+                    pbest.medal = 7;
+                } else if (pbest.time <= ssilver.time) {
+                    pbest.medal = 6;
+                } else if (pbest.time <= sbronze.time) {
+                    pbest.medal = 5;
+#endif
+                } else {
+                    pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+                }
+#else
 				pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+#endif
 			}
 #elif TURBO
 			if(network.TmRaceRules !is null) {
