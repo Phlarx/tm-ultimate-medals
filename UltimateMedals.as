@@ -449,9 +449,9 @@ void Main() {
 					// we check campaignMap so that a successful parse on a different map doesn't give a false positive
 					stmaster.time = int(super.m_time);
 					auto delta = tmaster.time - stmaster.time;
-					sgold.time = stmaster.time + delta/8;
-					ssilver.time = stmaster.time + delta/4;
-					sbronze.time = stmaster.time + delta/2;
+					sgold.time = stmaster.time + (delta+4)/8;
+					ssilver.time = stmaster.time + (delta+2)/4;
+					sbronze.time = stmaster.time + (delta+1)/2;
 				} else {
 					stmaster.time = -9;
 					sgold.time = -8;
