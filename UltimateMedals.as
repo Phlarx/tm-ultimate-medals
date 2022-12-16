@@ -40,6 +40,12 @@ bool showMapName = false;
 [Setting category="Additional Info" name="Show Author Name"]
 bool showAuthorName = false;
 
+[Setting category="Additional Info" name="Limit Map Name length" description="If the map name is too long, it will automatically scroll to still make it readable."]
+bool limitMapNameLength = true;
+
+[Setting category="Additional Info" name="Limit Map Name length width" description="Width in pixels to limit the map name length by. This requires \"Limit Map Name length\" to be enabled." min="100" max="400"]
+int limitMapNameLengthWidth = 275;
+
 /*Icons::InfoCircle*/
 [Setting category="Additional Info" name="Show Map Comment on Hover" description="An 'i' icon will appear next to the map name or author name, if a comment is available."]
 bool showComment = false;
@@ -218,6 +224,9 @@ string loadedFontFace = "";
 int loadedFontSize = 0;
 UI::Font@ font = null;
 
+uint64 limitMapNameLengthTime = 0;
+uint64 limitMapNameLengthTimeEnd = 0;
+
 
 bool held = false;
 void OnKeyPress(bool down, VirtualKey key)
@@ -275,16 +284,86 @@ void Render() {
 			if(showMapName) {
 				UI::TableNextRow();
 				UI::TableNextColumn();
+				string mapNameText = "";
 #if TURBO
-				UI::Text((campaignMap ? "#" : "") + StripFormatCodes(map.MapInfo.Name) + (hasComment && !showAuthorName ? " \\$68f" + Icons::InfoCircle : ""));
-#else
-				UI::Text(StripFormatCodes(map.MapInfo.Name) + (hasComment && !showAuthorName ? " \\$68f" + Icons::InfoCircle : ""));
+				if (campaignMap) {
+					mapNameText = "#";
+				}
 #endif
+				mapNameText += StripFormatCodes(map.MapInfo.Name);
+				if (hasComment && !showAuthorName) {
+					mapNameText += " \\$68f" + Icons::InfoCircle;
+				}
+				if (limitMapNameLength) {
+					vec2 size = Draw::MeasureString(mapNameText);
+
+					const uint64 timeOffsetStart = 1000;
+					const uint64 timeOffsetEnd = 2000;
+					const int scrollSpeed = 20; // Lower is faster
+
+					if (size.x > limitMapNameLengthWidth) {
+						auto dl = UI::GetWindowDrawList();
+						vec2 cursorPos = UI::GetWindowPos() + UI::GetCursorPos();
+
+						// Create a dummy for the text
+						UI::Dummy(vec2(limitMapNameLengthWidth, size.y));
+
+						// If the text is hovered, reset now
+						if (UI::IsItemHovered()) {
+							limitMapNameLengthTime = Time::Now;
+							limitMapNameLengthTimeEnd = 0;
+						}
+
+						vec2 textPos = vec2(0, 0);
+
+						// Move the text forwards after the start time has passed
+						uint64 timeOffset = Time::Now - limitMapNameLengthTime;
+						if (timeOffset > timeOffsetStart) {
+							uint64 moveTimeOffset = timeOffset - timeOffsetStart;
+							textPos.x = -(moveTimeOffset / scrollSpeed);
+						}
+
+						// Stop moving when we've reached the end
+						if (textPos.x < -(size.x - limitMapNameLengthWidth)) {
+							textPos.x = -(size.x - limitMapNameLengthWidth);
+
+							// Begin waiting for the end time
+							if (limitMapNameLengthTimeEnd == 0) {
+								limitMapNameLengthTimeEnd = Time::Now;
+							}
+						}
+
+						// Go back to the starting position after the end time has passed
+						if (limitMapNameLengthTimeEnd > 0) {
+							uint64 endTimeOffset = Time::Now - limitMapNameLengthTimeEnd;
+							if (endTimeOffset > timeOffsetEnd) {
+								limitMapNameLengthTime = Time::Now;
+								limitMapNameLengthTimeEnd = 0;
+							}
+						}
+
+						// Draw the map name
+						vec4 rectBox = vec4(cursorPos.x, cursorPos.y, limitMapNameLengthWidth, size.y);
+						dl.PushClipRect(rectBox, true);
+						dl.AddText(cursorPos + textPos, vec4(1, 1, 1, 1), mapNameText);
+						dl.PopClipRect();
+					} else {
+						// It fits, so we can render it normally
+						UI::Text(mapNameText);
+					}
+				} else {
+					// We don't care about the max length, so we render it normally
+					UI::Text(mapNameText);
+				}
 			}
 			if(showAuthorName) {
 				UI::TableNextRow();
 				UI::TableNextColumn();
-				UI::Text("\\$888by " + StripFormatCodes(map.MapInfo.AuthorNickName) + (hasComment ? " \\$68f" + Icons::InfoCircle : ""));
+				string authorNameText = "\\$888by " + StripFormatCodes(map.MapInfo.AuthorNickName);
+				if (hasComment) {
+					authorNameText += " \\$68f" + Icons::InfoCircle;
+				}
+				UI::Text(authorNameText);
 			}
 			UI::EndTable();
 		}
@@ -468,6 +547,9 @@ void Main() {
 				pbest.medal = 0;
 				
 				currentMapUid = map.MapInfo.MapUid;
+
+				limitMapNameLengthTime = Time::Now;
+				limitMapNameLengthTimeEnd = 0;
 				
 				UpdateHidden();
 			}
