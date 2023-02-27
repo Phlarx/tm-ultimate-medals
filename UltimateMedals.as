@@ -1,3 +1,9 @@
+enum displays {
+    Only_when_Openplanet_menu_is_open,
+    Always_except_when_interface_is_hidden,
+    Always
+}
+
 [Setting category="Medals" name="Show Header"]
 bool showHeader = true;
 
@@ -65,8 +71,8 @@ bool windowVisible = true;
 [Setting category="Display Settings" name="Window visiblility hotkey"]
 VirtualKey windowVisibleKey = VirtualKey(0);
 
-[Setting category="Display Settings" name="Hide on hidden interface"]
-bool hideWithIFace = false;
+[Setting category="Display Settings" name="Display setting" ]
+displays setting_display = displays::Always_except_when_interface_is_hidden;
 
 [Setting category="Display Settings" name="Window position"]
 vec2 anchor = vec2(0, 170);
@@ -244,7 +250,37 @@ void RenderMenu() {
 	}
 }
 
+enum RenderMode {
+    Normal,
+    Interface
+}
+
 void Render() {
+    if (can_render(RenderMode::Normal)) render_window();
+}
+
+void RenderInterface() {
+    if (can_render(RenderMode::Interface)) render_window();
+}
+
+bool can_render(RenderMode rendermode) {
+	if (!windowVisible) return false;
+    if (rendermode == RenderMode::Normal && (setting_display == displays::Only_when_Openplanet_menu_is_open)) return false;
+    if (rendermode == RenderMode::Interface && (setting_display != displays::Only_when_Openplanet_menu_is_open)) return false;
+    
+    auto app = cast<CTrackMania>(GetApp());
+#if TMNEXT||MP4
+    auto map = app.RootMap;
+#elif TURBO
+    auto map = app.Challenge;
+#endif
+    if (map is null || map.MapInfo.MapUid == "" || app.Editor !is null) return false;
+    if (app.CurrentPlayground is null || app.CurrentPlayground.Interface is null  ||
+     (setting_display == displays::Always_except_when_interface_is_hidden && !UI::IsGameUIVisible())) return false;
+    return true;
+}
+
+void render_window() {
 	auto app = cast<CTrackMania>(GetApp());
 	
 #if TMNEXT||MP4
@@ -252,11 +288,7 @@ void Render() {
 #elif TURBO
 	auto map = app.Challenge;
 #endif
-	
-	if(hideWithIFace && !UI::IsGameUIVisible()) {
-		return;
-	}
-	
+		
 	if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 		if(lockPosition) {
 			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
