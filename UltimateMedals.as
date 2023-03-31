@@ -606,14 +606,22 @@ void Main() {
 						if(app.ReplayRecordInfos[i] !is null
 							 && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
 							 && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
-							print('hey ' + tostring(i));
 							auto record = app.ReplayRecordInfos[i];
 							if(score < 0 || record.BestTime < uint(score)) {
 								score = int(record.BestTime);
 							}
 						}
 						// to prevent lag spikes when updating medals, scan at most 256 per tick
-						if(i & 0xff == 0xff) { yield(); }
+						if(i & 0xff == 0xff) {
+							yield();
+							// since we're yielding, it's possible for a race condition to occur, and things to get yanked out
+							// from under our feet; look for this case and bail if it happens
+							if(app.CurrentProfile is null || app.CurrentProfile.AccountSettings is null
+									|| app.ReplayRecordInfos is null || app.ReplayRecordInfos.Length <= i) {
+								warn("Game state changed while scanning records. Retrying in 500ms...");
+								break;
+							}
+						}
 					}
 				}
 				
