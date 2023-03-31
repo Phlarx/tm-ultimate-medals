@@ -624,7 +624,7 @@ void Main() {
 							// since we're yielding, it's possible for a race condition to occur, and things to get yanked out
 							// from under our feet; look for this case and bail if it happens
 							if(app.CurrentProfile is null || app.CurrentProfile.AccountSettings is null
-									|| app.ReplayRecordInfos is null || app.ReplayRecordInfos.Length <= i) {
+									|| app.ReplayRecordInfos.Length <= i) {
 								warn("Game state changed while scanning records. Retrying in 500ms...");
 								break;
 							}
