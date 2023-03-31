@@ -65,8 +65,11 @@ bool windowVisible = true;
 [Setting category="Display Settings" name="Window visiblility hotkey"]
 VirtualKey windowVisibleKey = VirtualKey(0);
 
-[Setting category="Display Settings" name="Hide on hidden interface"]
+[Setting category="Display Settings" name="Hide when the game interface is hidden"]
 bool hideWithIFace = false;
+
+[Setting category="Display Settings" name="Hide when the Openplanet overlay is hidden"]
+bool hideWithOverlay = false;
 
 [Setting category="Display Settings" name="Window position"]
 vec2 anchor = vec2(0, 170);
@@ -254,6 +257,10 @@ void Render() {
 #endif
 	
 	if(hideWithIFace && !UI::IsGameUIVisible()) {
+		return;
+	}
+	
+	if(hideWithOverlay && !UI::IsOverlayShown()) {
 		return;
 	}
 	
