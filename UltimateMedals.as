@@ -5,6 +5,11 @@ bool showHeader = true;
 bool showPbest = true;
 
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+[Setting category="Medals" name="Show Champion"]
+bool showChampion = true;
+#endif
+
 [Setting category="Medals" name="Show Author"]
 bool showAuthor = true;
 
@@ -85,6 +90,11 @@ int fontSize = 16;
 
 /* Custom names */
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+[Setting category="Display Text" name="Champion Text"]
+string championText = "Champion";
+#endif
+
 [Setting category="Display Text" name="Author Text"]
 string authorText = "Author";
 
@@ -124,6 +134,9 @@ const array<string> medals = {
 	"\\$db4" + Icons::Circle, // gold medal
 #if TMNEXT||MP4
 	"\\$071" + Icons::Circle, // author medal
+#if DEPENDENCY_CHAMPIONMEDALS
+	"\\$c12" + Icons::Circle, // champion medal
+#endif
 #elif TURBO
 	"\\$0f1" + Icons::Circle, // trackmaster medal
 	"\\$964" + Icons::Circle, // super bronze medal
@@ -199,6 +212,9 @@ class Record {
 }
 
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+Record@ champion = Record(championText, 5, -6);
+#endif
 Record@ author = Record(authorText, 4, -5);
 #elif TURBO
 Record@ stmaster = Record(stmasterText, 8, -9);
@@ -213,7 +229,11 @@ Record@ bronze = Record(bronzeText, 1, -2);
 Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
 
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+array<Record@> times = {champion, author, gold, silver, bronze, pbest};
+#else
 array<Record@> times = {author, gold, silver, bronze, pbest};
+#endif
 #elif TURBO
 array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver, bronze, pbest};
 
@@ -407,6 +427,12 @@ void Render() {
 				if(times[i].hidden) {
 					continue;
 				}
+#if DEPENDENCY_CHAMPIONMEDALS
+				//We hide champion if not present
+				if(times[i] == champion && times[i].time <= 0){
+					continue;
+				}
+#endif
 				UI::TableNextRow();
 				
 				if(showMedalIcons) {
@@ -463,6 +489,9 @@ void LoadFont() {
 
 void UpdateHidden() {
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+	champion.hidden = !showChampion;
+#endif
 	author.hidden = !showAuthor;
 #elif TURBO
 	// If no super times, never show them
@@ -480,6 +509,9 @@ void UpdateHidden() {
 
 void UpdateText() {
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS
+	champion.name = championText;
+#endif
 	author.name = authorText;
 #elif TURBO
 	stmaster.name = stmasterText;
@@ -493,6 +525,26 @@ void UpdateText() {
 	bronze.name = bronzeText;
 	pbest.name = pbestText;
 }
+
+#if DEPENDENCY_CHAMPIONMEDALS
+void UpdatePBMedalVSChampion(){
+	if(pbest.time > 0 && pbest.time <= champion.time){
+		pbest.medal=5;
+	}
+}
+//We refresh champion medal max 10 times per map. This is a workaround 
+//ChampionMedals::GetCMTime, which returns 0 both if the request failed (in which
+//case we need to try again), and if the map has no champion medal.
+auto cmUpdateCount = 0;
+void RefreshChampionMedal(){
+	if(champion.time <= 0 && cmUpdateCount < 10){
+		champion.time = ChampionMedals::GetCMTime();
+		cmUpdateCount++;
+		
+		UpdatePBMedalVSChampion();
+	}
+}
+#endif
 
 void OnSettingsChanged() {
 	//LoadFont(); // Disabled dynamic font changes due to memory leak. See issue https://github.com/Phlarx/tm-ultimate-medals/issues/17
@@ -522,6 +574,9 @@ void Main() {
 #endif
 		
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
+#if DEPENDENCY_CHAMPIONMEDALS
+			RefreshChampionMedal();
+#endif
 			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
 				author.time = map.TMObjective_AuthorTime;
@@ -577,6 +632,10 @@ void Main() {
 				// GameMode can be: "TimeAttack", "Follow", "ClashTime"
 				pbest.time = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
 				pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+				
+#if DEPENDENCY_CHAMPIONMEDALS			
+				UpdatePBMedalVSChampion();
+#endif
 			}
 #elif TURBO
 			if(network.TmRaceRules !is null) {
@@ -654,6 +713,10 @@ void Main() {
 			
 		} else if(map is null || map.MapInfo.MapUid == "") {
 #if TMNEXT||MP4
+#if DEPENDENCY_CHAMPIONMEDALS				
+			champion.time = -6;
+			cmUpdateCount = 0;
+#endif
 			author.time = -5;
 #elif TURBO
 			stmaster.time = -9;
