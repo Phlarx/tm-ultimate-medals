@@ -759,6 +759,8 @@ void AuthorNameFromMapUidCoro() {
 	else
 		currentAuthorName = NadeoServices::GetDisplayNameAsync(authorId);
 
+	authorNames.Set(currentMapUid, currentAuthorName);
+
 	gettingAuthorName = false;
 }
 #endif
