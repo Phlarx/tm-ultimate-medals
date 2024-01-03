@@ -265,8 +265,10 @@ void Render() {
 	}
 	
 #if TMNEXT
-	if (map is null || map.MapInfo is null || map.MapInfo.MapUid == "")
+	if (map is null || map.MapInfo is null || map.MapInfo.MapUid == "") {
 		currentAuthorName = "";
+		gettingAuthorName = false;
+	}
 #endif
 	
 	if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
@@ -740,17 +742,14 @@ void AuthorNameFromMapUidCoro() {
 		yield();
 
 	string reqStr = req.String();
-	if (reqStr == "[]") {
-		gettingAuthorName = false;
+	if (reqStr == "[]")
 		return;
-	}
 
 	string authorId;
 	try {
 		authorId = Json::Parse(reqStr)[0]["author"];
 	} catch {
 		warn("error getting author name: " + getExceptionInfo());
-		gettingAuthorName = false;
 		return;
 	}
 
