@@ -8,6 +8,11 @@ bool showPbest = true;
 [Setting category="Medals" name="Show Author"]
 bool showAuthor = true;
 
+#if TMNEXT
+[Setting category="Medals" name="Get Current Author Name"]
+bool getCurrentAuthorName = true;
+#endif
+
 #elif TURBO
 [Setting category="Medals" name="Show Super Trackmaster" description="Super medals will automatically be hidden on non-campaign tracks."]
 bool showStmaster = true;
@@ -375,7 +380,7 @@ void Render() {
 				UI::TableNextColumn();
 				string authorNameText = "\\$888by " + StripFormatCodes(map.MapInfo.AuthorNickName);
 #if TMNEXT
-				if (currentAuthorName == "" && !gettingAuthorName) {
+				if (getCurrentAuthorName && currentAuthorName == "" && !gettingAuthorName) {
 					if (map.MapInfo.AuthorNickName == "Nadeo") {
 						currentAuthorName = "Nadeo";
 					} else {
