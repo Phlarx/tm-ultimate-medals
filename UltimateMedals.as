@@ -264,6 +264,11 @@ void Render() {
 		return;
 	}
 	
+#if TMNEXT
+	if (map is null || map.MapInfo is null || map.MapInfo.MapUid == "")
+		currentAuthorName = "";
+#endif
+	
 	if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 		if(lockPosition) {
 			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
@@ -367,6 +372,20 @@ void Render() {
 				UI::TableNextRow();
 				UI::TableNextColumn();
 				string authorNameText = "\\$888by " + StripFormatCodes(map.MapInfo.AuthorNickName);
+#if TMNEXT
+				if (currentAuthorName == "" && !gettingAuthorName) {
+					if (map.MapInfo.AuthorNickName == "Nadeo") {
+						currentAuthorName = "Nadeo";
+					} else {
+						currentMapUid = map.MapInfo.MapUid;
+						gettingAuthorName = true;
+						startnew(AuthorNameFromMapUidCoro);
+					}
+				}
+
+				if (currentAuthorName != "")
+					authorNameText = "\\$888by " + StripFormatCodes(currentAuthorName);
+#endif
 				if (hasComment) {
 					authorNameText += " \\$68f" + Icons::InfoCircle;
 				}
@@ -692,5 +711,54 @@ uint CalcMedal() {
 	else if(pbest <= silver) return 2;
 	else if(pbest <= bronze) return 1;
 	else return 0;
+}
+#endif
+
+#if TMNEXT
+dictionary authorNames;
+string currentAuthorName;
+string currentMapUid;
+bool gettingAuthorName = false;
+
+void AuthorNameFromMapUidCoro() {
+	if (authorNames.Exists(currentMapUid)) {
+		currentAuthorName = string(authorNames[currentMapUid]);
+		gettingAuthorName = false;
+		return;
+	}
+
+	NadeoServices::AddAudience("NadeoServices");
+	while (!NadeoServices::IsAuthenticated("NadeoServices"))
+		yield();
+
+	Net::HttpRequest@ req = NadeoServices::Get(
+		"NadeoServices",
+		NadeoServices::BaseURLCore() + "/maps/?mapUidList=" + currentMapUid
+	);
+	req.Start();
+	while (!req.Finished())
+		yield();
+
+	string reqStr = req.String();
+	if (reqStr == "[]") {
+		gettingAuthorName = false;
+		return;
+	}
+
+	string authorId;
+	try {
+		authorId = Json::Parse(reqStr)[0]["author"];
+	} catch {
+		warn("error getting author name: " + getExceptionInfo());
+		gettingAuthorName = false;
+		return;
+	}
+
+	if (authorId == "d2372a08-a8a1-46cb-97fb-23a161d85ad0")
+		currentAuthorName = "Nadeo";
+	else
+		currentAuthorName = NadeoServices::GetDisplayNameAsync(authorId);
+
+	gettingAuthorName = false;
 }
 #endif
