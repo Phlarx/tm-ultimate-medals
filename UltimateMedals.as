@@ -77,6 +77,9 @@ vec2 anchor = vec2(0, 170);
 [Setting category="Display Settings" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
 
+[Setting category="Display Settings" name="Right-align window" description="Makes it so the right side of the window rather than the left side remains fixed as window size changes."]
+bool rightAlign = true;
+
 [Setting category="Display Settings" name="Font face" description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
 string fontFace = "";
 
@@ -230,6 +233,7 @@ UI::Font@ font = null;
 uint64 limitMapNameLengthTime = 0;
 uint64 limitMapNameLengthTimeEnd = 0;
 
+float windowWidth = 0;
 
 bool held = false;
 void OnKeyPress(bool down, VirtualKey key)
@@ -280,10 +284,10 @@ void Render() {
 		
 		UI::Begin("Ultimate Medals", windowFlags);
 		
-		if(!lockPosition) {
-			anchor = UI::GetWindowPos();
-		}
-		
+        if(!lockPosition) {
+            anchor = UI::GetWindowPos();
+        }
+
 		bool hasComment = string(map.MapInfo.Comments).Length > 0;
 		
 		UI::BeginGroup();
@@ -437,7 +441,15 @@ void Render() {
 			UI::PopTextWrapPos();
 			UI::EndTooltip();
 		}
-		
+
+		float newWidth = UI::GetWindowSize().x;
+        if (windowWidth != newWidth) {
+            if(rightAlign) {
+                UI::SetWindowPos(UI::GetWindowPos() - vec2(newWidth - windowWidth, 0));
+            }
+            windowWidth = newWidth;
+        }
+
 		UI::End();
 		
 		UI::PopFont();
