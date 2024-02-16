@@ -78,7 +78,7 @@ vec2 anchor = vec2(0, 170);
 bool lockPosition = false;
 
 [Setting category="Display Settings" name="Right-align window" description="Makes it so the right side of the window rather than the left side remains fixed as window size changes."]
-bool rightAlign = true;
+bool rightAlign = false;
 
 [Setting category="Display Settings" name="Font face" description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
 string fontFace = "";
