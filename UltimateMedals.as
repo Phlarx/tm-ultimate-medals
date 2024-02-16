@@ -284,9 +284,9 @@ void Render() {
 		
 		UI::Begin("Ultimate Medals", windowFlags);
 		
-        if(!lockPosition) {
-            anchor = UI::GetWindowPos();
-        }
+		if(!lockPosition) {
+			anchor = UI::GetWindowPos();
+		}
 
 		bool hasComment = string(map.MapInfo.Comments).Length > 0;
 		
@@ -443,12 +443,12 @@ void Render() {
 		}
 
 		float newWidth = UI::GetWindowSize().x;
-        if (windowWidth != newWidth) {
-            if(rightAlign) {
-                UI::SetWindowPos(UI::GetWindowPos() - vec2(newWidth - windowWidth, 0));
-            }
-            windowWidth = newWidth;
-        }
+		if (windowWidth != newWidth) {
+			if(rightAlign) {
+				UI::SetWindowPos(UI::GetWindowPos() - vec2(newWidth - windowWidth, 0));
+			}
+			windowWidth = newWidth;
+		}
 
 		UI::End();
 		
