@@ -444,7 +444,7 @@ void Render() {
 
 		float newWidth = UI::GetWindowSize().x;
 		if (windowWidth != newWidth) {
-			if(rightAlign) {
+			if(rightAlign && windowWidth != 0) {
 				UI::SetWindowPos(UI::GetWindowPos() - vec2(newWidth - windowWidth, 0));
 			}
 			windowWidth = newWidth;
