@@ -56,6 +56,14 @@ bool showMedalIcons = true;
 [Setting category="Additional Info" name="Show Personal Best Delta Time"]
 bool showPbestDelta = false;
 
+#if TMNEXT
+[Setting category="Additional Info" name="Show Players Percentage"]
+bool showPlayerPercentage = true;
+
+#else
+bool showPlayerPercentage = false;
+#endif
+
 [Setting category="Additional Info" name="Show Personal Best Negative Delta Time"]
 bool showPbestDeltaNegative = true;
 
@@ -117,6 +125,9 @@ string bronzeText = "Bronze";
 [Setting category="Display Text" name="Personal Best Text" description="Override names to be shown in the window."]
 string pbestText = "Pers. Best";
 
+int oldPb = 0;
+int playerCount;
+
 const array<string> medals = {
 	"\\$444" + Icons::Circle, // no medal
 	"\\$964" + Icons::Circle, // bronze medal
@@ -139,6 +150,7 @@ class Record {
 	int time;
 	string style;
 	bool hidden;
+	float percent;
 	
 	Record(string &in name = "Unknown", uint medal = 0, int time = -1, string &in style = "\\$fff") {
 		this.name = name;
@@ -146,6 +158,7 @@ class Record {
 		this.time = time;
 		this.style = style;
 		this.hidden = false;
+		this.percent = 0;
 	}
 
 	void DrawIcon() {
@@ -184,6 +197,12 @@ class Record {
 		}
 	}
 	
+	void DrawPlayerPecentage(float percent){
+		UI::Text(this.style + percent+" %");
+	}
+
+
+
 	int opCmp(Record@ other) {
 		// like normal, except consider negatives to be larger than positives
 		if((this.time >= 0) == (other.time >= 0)) {
@@ -222,6 +241,7 @@ bool campaignMap = false;
 
 int timeWidth = 53;
 int deltaWidth = 60;
+int playerPercentageWidth = 50;
 
 string loadedFontFace = "";
 int loadedFontSize = 0;
@@ -378,6 +398,8 @@ void Render() {
 		int numCols = 2; // name and time columns are always shown
 		if(showMedalIcons) numCols++;
 		if(showPbestDelta) numCols++;
+		if(showPlayerPercentage) numCols++;
+
 		
 		if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit)) {
 			if(showHeader) {
@@ -401,8 +423,16 @@ void Render() {
 					setMinWidth(deltaWidth);
 					UI::Text("Delta");
 				}
+
+				if (showPlayerPercentage) {
+					UI::TableNextColumn();
+					setMinWidth(playerPercentageWidth);
+					UI::Text("Players");
+				}
 			}
 			
+
+
 			for(uint i = 0; i < times.Length; i++) {
 				if(times[i].hidden) {
 					continue;
@@ -424,6 +454,11 @@ void Render() {
 					UI::TableNextColumn();
 					times[i].DrawDelta(pbest);
 				}
+
+				if (showPlayerPercentage) {
+					UI::TableNextColumn();
+					times[i].DrawPlayerPecentage(times[i].percent);
+				}
 			}
 			
 			UI::EndTable();
@@ -442,6 +477,26 @@ void Render() {
 		
 		UI::PopFont();
 	}
+}
+
+float calcPercentage(const int &in pos, const int &in total) {
+	return float(int(((float(pos) / float(total)) * 100.0) * 100.0)) / 100.0;
+}
+
+int getRankFromTime(const string &in mapId, int time)
+{
+    auto req = Net::HttpRequest();
+    req.Url = "https://map-monitor.xk.io/map/"+mapId+"/"+time+"/refresh";
+    req.Method = Net::HttpMethod::Get;
+
+    req.Start();
+    while(!req.Finished()){
+        yield();
+    }
+
+    auto response = Json::Parse(req.String())["tops"][0]["top"][0]["position"];
+
+    return response;
 }
 
 void setMinWidth(int width) {
@@ -523,8 +578,24 @@ void Main() {
 		
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 			if(currentMapUid != map.MapInfo.MapUid) {
-#if TMNEXT||MP4
+#if MP4
 				author.time = map.TMObjective_AuthorTime;
+
+#elif TMNEXT
+
+				playerCount = getRankFromTime(map.MapInfo.MapUid, 999999999);
+
+				author.time = map.TMObjective_AuthorTime;
+				gold.time = map.TMObjective_GoldTime;
+				silver.time = map.TMObjective_SilverTime;
+				bronze.time = map.TMObjective_BronzeTime;
+
+				author.percent = calcPercentage(getRankFromTime(map.MapInfo.MapUid, author.time), playerCount);
+				gold.percent = calcPercentage(getRankFromTime(map.MapInfo.MapUid, gold.time), playerCount);
+				silver.percent = calcPercentage(getRankFromTime(map.MapInfo.MapUid, silver.time), playerCount);
+				bronze.percent = calcPercentage(getRankFromTime(map.MapInfo.MapUid, bronze.time), playerCount);
+
+				
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
 				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
@@ -548,16 +619,17 @@ void Main() {
 				gold.time = map.TMObjective_GoldTime;
 				silver.time = map.TMObjective_SilverTime;
 				bronze.time = map.TMObjective_BronzeTime;
-				
+
 				// prevent 'leaking' a stale PB between maps
 				pbest.time = -1;
 				pbest.medal = 0;
 				
 				currentMapUid = map.MapInfo.MapUid;
+				oldPb = 0;
 
 				limitMapNameLengthTime = Time::Now;
 				limitMapNameLengthTimeEnd = 0;
-				
+						
 				UpdateHidden();
 			}
 			
@@ -575,8 +647,16 @@ void Main() {
 				// from: OpenplanetNext\Extract\Titles\Trackmania\Scripts\Libs\Nadeo\TMNext\TrackMania\Menu\Constants.Script.txt
 				// ScopeType can be: "Season", "PersonalBest"
 				// GameMode can be: "TimeAttack", "Follow", "ClashTime"
+				
 				pbest.time = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
 				pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+
+				if (pbest.time != oldPb && pbest.time > 0){ // If the player pb, recalulate the percentage
+					pbest.percent = calcPercentage(getRankFromTime(currentMapUid, pbest.time), playerCount);
+					oldPb = pbest.time;
+				}
+
+
 			}
 #elif TURBO
 			if(network.TmRaceRules !is null) {
@@ -653,8 +733,17 @@ void Main() {
 			}
 			
 		} else if(map is null || map.MapInfo.MapUid == "") {
-#if TMNEXT||MP4
+#if MP4
 			author.time = -5;
+
+#elif TMNEXT
+
+			author.time = -5;
+			author.percent = 0;
+			gold.percent = 0;
+			silver.percent = 0;
+			bronze.percent = 0;
+
 #elif TURBO
 			stmaster.time = -9;
 			sgold.time = -8;
