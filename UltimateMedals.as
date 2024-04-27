@@ -743,6 +743,7 @@ void Main() {
 			gold.percent = 0;
 			silver.percent = 0;
 			bronze.percent = 0;
+			pbest.percent = 0;
 
 #elif TURBO
 			stmaster.time = -9;
