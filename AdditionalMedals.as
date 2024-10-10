@@ -35,3 +35,25 @@ bool enableChampionMedals = true;
 
 [Setting category="Additional Medals" name="Enable Warrior Medals" if="IsWarriorMedalsActive"]
 bool enableWarriorMedals = true;
+
+uint GetChampionMedalsTime() {
+#if DEPENDENCY_CHAMPIONMEDALS
+    if (!IsChampionMedalsActive) {
+        return -1;
+    }
+    return ChampionMedals::GetCMTime();
+#else
+    return -1;
+#endif
+}
+
+uint GetWarriorMedalsTime() {
+#if DEPENDENCY_WARRIORMEDALS
+    if (!IsWarriorMedalsActive) {
+        return -1;
+    }
+    return WarriorMedals::GetWMTime();
+#else
+    return -1;
+#endif
+}
