@@ -122,10 +122,6 @@ const array<string> medals = {
 	"\\$964" + Icons::Circle, // bronze medal
 	"\\$899" + Icons::Circle, // silver medal
 	"\\$db4" + Icons::Circle, // gold medal
-#if TMNEXT
-	"\\$f47" + Icons::Circle, // champion medal
-	"\\$3cf" + Icons::Circle, // warrior medal
-#endif
 #if TMNEXT||MP4
 	"\\$071" + Icons::Circle, // author medal
 #elif TURBO
@@ -134,6 +130,10 @@ const array<string> medals = {
 	"\\$899" + Icons::Circle, // super silver medal
 	"\\$db4" + Icons::Circle, // super gold medal
 	"\\$0ff" + Icons::Circle, // super trackmaster medal
+#endif
+#if TMNEXT
+	"\\$f47" + Icons::Circle, // champion medal
+	"\\$3cf" + Icons::Circle, // warrior medal
 #endif
 };
 

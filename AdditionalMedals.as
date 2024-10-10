@@ -30,19 +30,19 @@ bool get_ShowWarriorMedals() {
     return enableWarriorMedals && IsWarriorMedalsActive;
 }
 
-[Setting category="Additional Medals" name="Enable Champion Medals" if="IsChampionMedalsActive"]
-bool enableChampionMedals = true;
-
-[Setting category="Additional Medals" name="Enable Warrior Medals" if="IsWarriorMedalsActive"]
-bool enableWarriorMedals = true;
-
-[Setting category="Display Text" name="Champion Text" if="IsChampionMedalsActive"]
+[Setting category="Display Text" name="Champion Text" if="get_IsChampionMedalsActive"]
 string championText = "Champion";
 
-[Setting category="Display Text" name="Warrior Text" if="IsWarriorMedalsActive"]
+[Setting category="Display Text" name="Warrior Text" if="get_IsWarriorMedalsActive"]
 string warriorText = "Warrior";
 
-uint GetChampionMedalsTime() {
+[Setting category="Additional Medals" name="Enable Champion Medals" if="get_IsChampionMedalsActive"]
+bool enableChampionMedals = true;
+
+[Setting category="Additional Medals" name="Enable Warrior Medals" if="get_IsWarriorMedalsActive"]
+bool enableWarriorMedals = true;
+
+int GetChampionMedalsTime() {
 #if DEPENDENCY_CHAMPIONMEDALS
     if (!IsChampionMedalsActive) {
         return -1;
@@ -53,7 +53,7 @@ uint GetChampionMedalsTime() {
 #endif
 }
 
-uint GetWarriorMedalsTime() {
+int GetWarriorMedalsTime() {
 #if DEPENDENCY_WARRIORMEDALS
     if (!IsWarriorMedalsActive) {
         return -1;
