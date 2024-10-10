@@ -1,25 +1,9 @@
-# [Ultimate Medals++](https://openplanet.dev/plugin/ultimate_medal_plusplus)
+# [Ultimate Medals](https://openplanet.dev/plugin/ultimatemedals)
 
-All of your medals in one place!
+[![Version](https://img.shields.io/badge/dynamic/json?color=pink&label=Version&query=version&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F118)](https://openplanet.dev/plugin/ultimatemedals)
+[![Total Downloads](https://img.shields.io/badge/dynamic/json?color=green&label=Downloads&query=downloads&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F118)](https://openplanet.dev/plugin/ultimatemedals)
+![Tags 1](https://img.shields.io/badge/dynamic/json?color=blue&label=Game&query=tags%5B0%5D.name&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F118)
+![Tags 2](https://img.shields.io/badge/dynamic/json?color=blue&label=Game&query=tags%5B1%5D.name&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F118)
+![Tags 3](https://img.shields.io/badge/dynamic/json?color=blue&label=Game&query=tags%5B2%5D.name&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F118)
 
-This plugin is a fork of the [original Ultimate Medals plugin](https://openplanet.dev/plugin/ultimatemedals) by [Phlarx](https://openplanet.dev/u/nan-inf). Please support them as well!
-
-This plugin only works with Trackmania 2020.
-
-## Medal supported
-- Champion medal
-- Warrior medal
-- Author medal
-- Gold medal
-- Silver medal
-- Bronze medal
-
-## Optional dependencies
-- [Champion Medals](https://openplanet.dev/plugin/championmedals) by [NaNInf](https://openplanet.dev/u/nan-inf)
-- [Warrior Medals](https://openplanet.dev/plugin/warriormedals) by [Ezio](https://openplanet.dev/u/ezio416)
-
-This plugin wasn't supposed to be released publicly at first, but I finally decided to do it. Everything is definitly not perfect, so feel free to report any issue you encounter. Also, any contribution is welcome!
-
-![Ultimate Medals++](./Images/Ultimate%20Medals++.png)
-
-By the way, this code is a mess XD. It's my first plugin and I wasn't even aware there's documentation for ManiaScript :|
+An OpenPlanet plugin to show medal times in Trackmania games
