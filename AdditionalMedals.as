@@ -37,10 +37,10 @@ bool enableChampionMedals = true;
 bool enableWarriorMedals = true;
 
 [Setting category="Display Text" name="Champion Text" if="IsChampionMedalsActive"]
-string championText = true;
+string championText = "Champion";
 
 [Setting category="Display Text" name="Warrior Text" if="IsWarriorMedalsActive"]
-string warriorText = true;
+string warriorText = "Warrior";
 
 uint GetChampionMedalsTime() {
 #if DEPENDENCY_CHAMPIONMEDALS
