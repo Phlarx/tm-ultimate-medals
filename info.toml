@@ -1,9 +1,10 @@
 [meta]
-name = "Ultimate Medals++"
-author = "Catalistique"
+name = "Ultimate Medals Test"
+author = "Phlarx"
 category = "Race"
-version = "0.0.1"
+
+siteid = 118
+version = "1.12.0"
 
 [script]
-dependencies = [ "NadeoServices" ]
 optional_dependencies = [ "ChampionMedals", "WarriorMedals" ]
