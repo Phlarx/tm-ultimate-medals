@@ -515,6 +515,8 @@ void OnSettingsChanged() {
 	UpdateText();
 }
 
+string currentMapUid = "";
+
 void Main() {
 	auto app = cast<CTrackMania>(GetApp());
 	auto network = cast<CTrackManiaNetwork>(app.Network);
@@ -526,8 +528,6 @@ void Main() {
 	LoadFont();
 	UpdateHidden();
 	UpdateText();
-
-	string currentMapUid = "";
 
 	while(true) {
 #if TMNEXT||MP4
@@ -573,6 +573,12 @@ void Main() {
 				limitMapNameLengthTime = Time::Now;
 				limitMapNameLengthTimeEnd = 0;
 
+#if TMNEXT
+				champion.time = -1;
+				warrior.time = -1;
+				startnew(WaitForAdditionalMedalsTimes, currentMapUid);
+#endif
+
 				UpdateHidden();
 			}
 
@@ -592,6 +598,7 @@ void Main() {
 				// GameMode can be: "TimeAttack", "Follow", "ClashTime"
 				pbest.time = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
 				pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+				UpdatePBMedalLabel();
 			}
 #elif TURBO
 			if(network.TmRaceRules !is null) {
@@ -665,6 +672,8 @@ void Main() {
 			else {
 				pbest.time = -1;
 				pbest.medal = 0;
+				champion.time = -1;
+				warrior.time = -1;
 			}
 
 		} else if(map is null || map.MapInfo.MapUid == "") {
@@ -707,5 +716,12 @@ uint CalcMedal() {
 	else if(pbest <= silver) return 2;
 	else if(pbest <= bronze) return 1;
 	else return 0;
+}
+#endif
+
+#if TMNEXT
+void UpdatePBMedalLabel() {
+	if (pbest <= champion) pbest.medal = 5;
+	else if (pbest <= warrior) pbest.medal = 6;
 }
 #endif

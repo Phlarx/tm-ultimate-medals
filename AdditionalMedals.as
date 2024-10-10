@@ -63,3 +63,41 @@ int GetWarriorMedalsTime() {
     return -1;
 #endif
 }
+
+uint additionalMedalCoroNonce = 0;
+
+void WaitForAdditionalMedalsTimes(const string &in mapUid) {
+#if TMNEXT
+    // wait a few frames before checking for additional medals
+    yield(5);
+    auto myNonce = ++additionalMedalCoroNonce;
+    while (myNonce == additionalMedalCoroNonce && mapUid == currentMapUid) {
+        // set this to false if any time is < 0
+        bool haveAllTimes = true;
+
+        if (champion.time < 0 && ShowChampionMedals) {
+            champion.time = GetChampionMedalsTime();
+            haveAllTimes = haveAllTimes && champion.time >= 0;
+            trace("Champion time: " + champion.time);
+        }
+
+        if (warrior.time < 0 && ShowWarriorMedals) {
+            warrior.time = GetWarriorMedalsTime();
+            haveAllTimes = haveAllTimes && warrior.time >= 0;
+            // warrior medal returns 0 if it does not exist
+            if (warrior.time == 0) {
+                warrior.hidden = true;
+            }
+            trace("Warrior time: " + warrior.time);
+        }
+
+        UpdatePBMedalLabel();
+        if (haveAllTimes) {
+            break;
+        }
+
+        yield(5);
+    }
+    trace("Additional medals times loaded");
+#endif
+}
