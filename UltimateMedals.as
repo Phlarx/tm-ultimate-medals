@@ -721,7 +721,7 @@ uint CalcMedal() {
 
 #if TMNEXT
 void UpdatePBMedalLabel() {
-	if (pbest <= champion) pbest.medal = 5;
-	else if (pbest <= warrior) pbest.medal = 6;
+	if (pbest <= champion && ShowChampionMedals) pbest.medal = 5;
+	else if (pbest <= warrior && ShowWarriorMedals) pbest.medal = 6;
 }
 #endif
