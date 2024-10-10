@@ -122,6 +122,10 @@ const array<string> medals = {
 	"\\$964" + Icons::Circle, // bronze medal
 	"\\$899" + Icons::Circle, // silver medal
 	"\\$db4" + Icons::Circle, // gold medal
+#if TMNEXT
+	"\\$f47" + Icons::Circle, // champion medal
+	"\\$3cf" + Icons::Circle, // warrior medal
+#endif
 #if TMNEXT||MP4
 	"\\$071" + Icons::Circle, // author medal
 #elif TURBO
@@ -212,7 +216,14 @@ Record@ silver = Record(silverText, 2, -3);
 Record@ bronze = Record(bronzeText, 1, -2);
 Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
 
-#if TMNEXT||MP4
+#if TMNEXT
+Record@ champion = Record(championText, 5, -6);
+Record@ warrior = Record(warriorText, 6, -7);
+#endif
+
+#if TMNEXT
+array<Record@> times = {champion, warrior, author, gold, silver, bronze, pbest};
+#elif MP4
 array<Record@> times = {author, gold, silver, bronze, pbest};
 #elif TURBO
 array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver, bronze, pbest};
@@ -461,7 +472,11 @@ void LoadFont() {
 	}
 }
 
-void UpdateHidden() {
+void UpdateHidden() {	
+#if TMNEXT
+	champion.hidden = !ShowChampionMedals;
+	warrior.hidden = !ShowWarriorMedals;
+#endif
 #if TMNEXT||MP4
 	author.hidden = !showAuthor;
 #elif TURBO

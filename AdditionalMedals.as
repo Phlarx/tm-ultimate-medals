@@ -30,11 +30,17 @@ bool get_ShowWarriorMedals() {
     return enableWarriorMedals && IsWarriorMedalsActive;
 }
 
-[Setting category="Additional Medals" name="Enabel Champion Medals" if="IsChampionMedalsActive"]
+[Setting category="Additional Medals" name="Enable Champion Medals" if="IsChampionMedalsActive"]
 bool enableChampionMedals = true;
 
 [Setting category="Additional Medals" name="Enable Warrior Medals" if="IsWarriorMedalsActive"]
 bool enableWarriorMedals = true;
+
+[Setting category="Display Text" name="Champion Text" if="IsChampionMedalsActive"]
+string championText = true;
+
+[Setting category="Display Text" name="Warrior Text" if="IsWarriorMedalsActive"]
+string warriorText = true;
 
 uint GetChampionMedalsTime() {
 #if DEPENDENCY_CHAMPIONMEDALS
