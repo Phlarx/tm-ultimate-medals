@@ -672,8 +672,10 @@ void Main() {
 			else {
 				pbest.time = -1;
 				pbest.medal = 0;
+#if TMNEXT
 				champion.time = -1;
 				warrior.time = -1;
+#endif
 			}
 
 		} else if(map is null || map.MapInfo.MapUid == "") {
