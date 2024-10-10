@@ -531,9 +531,9 @@ void Main() {
 
 	while(true) {
 #if TMNEXT||MP4
-		auto map = app.RootMap;
+		CGameCtnChallenge@ map = app.RootMap;
 #elif TURBO
-		auto map = app.Challenge;
+		CGameCtnChallenge@ map = app.Challenge;
 #endif
 
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
