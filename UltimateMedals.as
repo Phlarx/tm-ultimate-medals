@@ -428,7 +428,6 @@ void Render() {
 				if(showMedalIcons) {
 					UI::TableNextColumn();
 					times[i].DrawIcon();
-					// trace(times[i].name);
 				}
 				
 				UI::TableNextColumn();
