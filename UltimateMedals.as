@@ -5,12 +5,6 @@ bool showHeader = true;
 bool showPbest = true;
 
 #if TMNEXT||MP4
-[Setting category="Medals" name="Show Champion"]
-bool showChampion = false;
-
-[Setting category="Medals" name="Show Warrior"]
-bool showWarrior = true;
-
 [Setting category="Medals" name="Show Author"]
 bool showAuthor = true;
 
@@ -91,12 +85,6 @@ int fontSize = 16;
 
 /* Custom names */
 #if TMNEXT||MP4
-[Setting category="Display Text" name="Show Champion Text"]
-string championText = "Champion";
-
-[Setting category="Display Text" name="Warrior Text"]
-string warriorText = "Warrior";
-
 [Setting category="Display Text" name="Author Text"]
 string authorText = "Author";
 
@@ -129,6 +117,15 @@ string bronzeText = "Bronze";
 [Setting category="Display Text" name="Personal Best Text" description="Override names to be shown in the window."]
 string pbestText = "Pers. Best";
 
+[Setting category="Colors" name="Positive Color"]
+vec3 positiveColor = vec3(255,119,119);
+
+[Setting category="Colors" name="Negative Color"]
+vec3 negativeColor = vec3(119,119,255);
+
+[Setting category="Colors" name="Neutral Color"]
+vec3 neutralColor = vec3(170,170,170);
+
 const array<string> medals = {
 	"\\$444" + Icons::Circle, // no medal
 	"\\$964" + Icons::Circle, // bronze medal
@@ -136,8 +133,6 @@ const array<string> medals = {
 	"\\$db4" + Icons::Circle, // gold medal
 #if TMNEXT||MP4
 	"\\$071" + Icons::Circle, // author medal
-	"\\$16a" + Icons::Circle, // warrior medal
-	"\\$c13" + Icons::Circle  // champion medal
 #elif TURBO
 	"\\$0f1" + Icons::Circle, // trackmaster medal
 	"\\$964" + Icons::Circle, // super bronze medal
@@ -192,9 +187,11 @@ class Record {
 
 		int delta = other.time - this.time;
 		if (delta < 0 && showPbestDeltaNegative) {
-			UI::Text("\\$77f-" + Time::Format(delta * -1));
-		} else if (delta >= 0) {
-			UI::Text("\\$f77+" + Time::Format(delta));
+			UI::Text(Text::FormatOpenplanetColor(negativeColor/255.0) + "-" + Time::Format(delta * -1));
+		} else if (delta > 0) {
+			UI::Text(Text::FormatOpenplanetColor(positiveColor/255.0) + "+" + Time::Format(delta));
+		} else {
+			UI::Text(Text::FormatOpenplanetColor(neutralColor/255.0) + "0:00.000");
 		}
 	}
 	
@@ -213,8 +210,6 @@ class Record {
 }
 
 #if TMNEXT||MP4
-Record@ champion = Record(championText, 6, -7);
-Record@ warrior = Record(warriorText, 5, -6);
 Record@ author = Record(authorText, 4, -5);
 #elif TURBO
 Record@ stmaster = Record(stmasterText, 8, -9);
@@ -229,7 +224,7 @@ Record@ bronze = Record(bronzeText, 1, -2);
 Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
 
 #if TMNEXT||MP4
-array<Record@> times = {champion, warrior, author, gold, silver, bronze, pbest};
+array<Record@> times = {author, gold, silver, bronze, pbest};
 #elif TURBO
 array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver, bronze, pbest};
 
@@ -479,8 +474,6 @@ void LoadFont() {
 
 void UpdateHidden() {
 #if TMNEXT||MP4
-	champion.hidden = !showChampion || champion.time == 0;
-	warrior.hidden = !showWarrior || warrior.time == 0;
 	author.hidden = !showAuthor;
 #elif TURBO
 	// If no super times, never show them
@@ -498,8 +491,6 @@ void UpdateHidden() {
 
 void UpdateText() {
 #if TMNEXT||MP4
-	champion.name = championText;
-	warrior.name = warriorText;
 	author.name = authorText;
 #elif TURBO
 	stmaster.name = stmasterText;
@@ -544,24 +535,6 @@ void Main() {
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
-
-champion.time = 0;
-warrior.time = 0;
-
-#if DEPENDENCY_CHAMPIONMEDALS
-	sleep(1000);
-    uint cm_time = ChampionMedals::GetCMTime();
-	champion.time = cm_time;
-#else
-	champion.hidden = true;
-#endif 
-
-#if DEPENDENCY_WARRIORMEDALS
-    uint wm_time = WarriorMedals::GetWMTimeAsync();
-    warrior.time = wm_time;
-#else
-    warrior.hidden = true;
-#endif
 				author.time = map.TMObjective_AuthorTime;
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
@@ -689,20 +662,9 @@ warrior.time = 0;
 				pbest.time = -1;
 				pbest.medal = 0;
 			}
-
-#if TMNEXT
-	// Somehow the only way to show the right medal next to PB (Doesn't work in CalcMedal())
-	if (pbest.time <= champion.time && champion.time > 0) {
-		pbest.medal = 6;
-	} else if (pbest.time <= warrior.time && champion.time > 0) {
-		pbest.medal = 5;
-	}
-#endif
 			
 		} else if(map is null || map.MapInfo.MapUid == "") {
 #if TMNEXT||MP4
-			champion.time = -7;
-			warrior.time = -6;
 			author.time = -5;
 #elif TURBO
 			stmaster.time = -9;
