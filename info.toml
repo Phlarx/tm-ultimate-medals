@@ -5,6 +5,3 @@ category = "Race"
 
 siteid = 118
 version = "1.12.0"
-
-[script]
-optional_dependencies = [ "ChampionMedals", "WarriorMedals" ]
