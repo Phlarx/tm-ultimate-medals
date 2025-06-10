@@ -151,7 +151,7 @@ class Record {
 	void DrawIcon() {
 #if TURBO
 		if(5 <= this.medal && this.medal <= 7) {
-			UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
+			UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize * UI::GetScale()));
 			UI::Text(medals[this.medal]);
 			UI::Text("\\$0f1" + Icons::CircleO);
 			UI::PopStyleVar();
@@ -446,7 +446,7 @@ void Render() {
 
 void setMinWidth(int width) {
 	UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, 0));
-	UI::Dummy(vec2(width, 0));
+	UI::Dummy(vec2(width * UI::GetScale(), 0));
 	UI::PopStyleVar();
 }
 
