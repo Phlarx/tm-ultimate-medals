@@ -131,6 +131,10 @@ const array<string> medals = {
 	"\\$db4" + Icons::Circle, // super gold medal
 	"\\$0ff" + Icons::Circle, // super trackmaster medal
 #endif
+#if TMNEXT
+	"\\$f47" + Icons::Circle, // champion medal
+	"\\$3cf" + Icons::Circle, // warrior medal
+#endif
 };
 
 class Record {
@@ -139,7 +143,7 @@ class Record {
 	int time;
 	string style;
 	bool hidden;
-	
+
 	Record(string &in name = "Unknown", uint medal = 0, int time = -1, string &in style = "\\$fff") {
 		this.name = name;
 		this.medal = medal;
@@ -166,11 +170,11 @@ class Record {
 	void DrawName() {
 		UI::Text(this.style + this.name);
 	}
-	
+
 	void DrawTime() {
 		UI::Text(this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---"));
 	}
-	
+
 	void DrawDelta(Record@ other) {
 		if (this is other || other.time <= 0) {
 			return;
@@ -183,7 +187,7 @@ class Record {
 			UI::Text("\\$f77+" + Time::Format(delta));
 		}
 	}
-	
+
 	int opCmp(Record@ other) {
 		// like normal, except consider negatives to be larger than positives
 		if((this.time >= 0) == (other.time >= 0)) {
@@ -212,7 +216,14 @@ Record@ silver = Record(silverText, 2, -3);
 Record@ bronze = Record(bronzeText, 1, -2);
 Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
 
-#if TMNEXT||MP4
+#if TMNEXT
+Record@ champion = Record(championText, 5, -6);
+Record@ warrior = Record(warriorText, 6, -7);
+#endif
+
+#if TMNEXT
+array<Record@> times = {champion, warrior, author, gold, silver, bronze, pbest};
+#elif MP4
 array<Record@> times = {author, gold, silver, bronze, pbest};
 #elif TURBO
 array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver, bronze, pbest};
@@ -249,43 +260,43 @@ void RenderMenu() {
 
 void Render() {
 	auto app = cast<CTrackMania>(GetApp());
-	
+
 #if TMNEXT||MP4
 	auto map = app.RootMap;
 #elif TURBO
 	auto map = app.Challenge;
 #endif
-	
+
 	if(hideWithIFace && !UI::IsGameUIVisible()) {
 		return;
 	}
-	
+
 	if(hideWithOverlay && !UI::IsOverlayShown()) {
 		return;
 	}
-	
+
 	if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 		if(lockPosition) {
 			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
 		} else {
 			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::FirstUseEver);
 		}
-		
+
 		int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
 		if (!UI::IsOverlayShown()) {
 				windowFlags |= UI::WindowFlags::NoInputs;
 		}
-		
+
 		UI::PushFont(font);
-		
+
 		UI::Begin("Ultimate Medals", windowFlags);
-		
+
 		if(!lockPosition) {
 			anchor = UI::GetWindowPos();
 		}
-		
+
 		bool hasComment = string(map.MapInfo.Comments).Length > 0;
-		
+
 		UI::BeginGroup();
 		if((showMapName || showAuthorName) && UI::BeginTable("header", 1, UI::TableFlags::SizingFixedFit)) {
 			if(showMapName) {
@@ -374,49 +385,49 @@ void Render() {
 			}
 			UI::EndTable();
 		}
-		
+
 		int numCols = 2; // name and time columns are always shown
 		if(showMedalIcons) numCols++;
 		if(showPbestDelta) numCols++;
-		
+
 		if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit)) {
 			if(showHeader) {
 				UI::TableNextRow();
-				
+
 				if (showMedalIcons) {
 					UI::TableNextColumn();
 					// Medal icon has no header text
 				}
-				
+
 				UI::TableNextColumn();
 				setMinWidth(0);
 				UI::Text("Medal");
-				
+
 				UI::TableNextColumn();
 				setMinWidth(timeWidth);
 				UI::Text("Time");
-				
+
 				if (showPbestDelta) {
 					UI::TableNextColumn();
 					setMinWidth(deltaWidth);
 					UI::Text("Delta");
 				}
 			}
-			
+
 			for(uint i = 0; i < times.Length; i++) {
 				if(times[i].hidden) {
 					continue;
 				}
 				UI::TableNextRow();
-				
+
 				if(showMedalIcons) {
 					UI::TableNextColumn();
 					times[i].DrawIcon();
 				}
-				
+
 				UI::TableNextColumn();
 				times[i].DrawName();
-				
+
 				UI::TableNextColumn();
 				times[i].DrawTime();
 
@@ -425,11 +436,11 @@ void Render() {
 					times[i].DrawDelta(pbest);
 				}
 			}
-			
+
 			UI::EndTable();
 		}
 		UI::EndGroup();
-		
+
 		if(hasComment && showComment && UI::IsItemHovered()) {
 			UI::BeginTooltip();
 			UI::PushTextWrapPos(200);
@@ -437,9 +448,9 @@ void Render() {
 			UI::PopTextWrapPos();
 			UI::EndTooltip();
 		}
-		
+
 		UI::End();
-		
+
 		UI::PopFont();
 	}
 }
@@ -462,6 +473,10 @@ void LoadFont() {
 }
 
 void UpdateHidden() {
+#if TMNEXT
+	champion.hidden = !ShowChampionMedals;
+	warrior.hidden = !ShowWarriorMedals;
+#endif
 #if TMNEXT||MP4
 	author.hidden = !showAuthor;
 #elif TURBO
@@ -500,27 +515,27 @@ void OnSettingsChanged() {
 	UpdateText();
 }
 
+string currentMapUid = "";
+
 void Main() {
 	auto app = cast<CTrackMania>(GetApp());
 	auto network = cast<CTrackManiaNetwork>(app.Network);
-	
+
 #if TURBO
 	TurboSTM::Initialize();
 #endif
-	
+
 	LoadFont();
 	UpdateHidden();
 	UpdateText();
-	
-	string currentMapUid = "";
-	
+
 	while(true) {
 #if TMNEXT||MP4
-		auto map = app.RootMap;
+		CGameCtnChallenge@ map = app.RootMap;
 #elif TURBO
-		auto map = app.Challenge;
+		CGameCtnChallenge@ map = app.Challenge;
 #endif
-		
+
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
@@ -528,7 +543,7 @@ void Main() {
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
 				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
-				
+
 				auto super = TurboSTM::GetSuperTime(mapNumber);
 				tmaster.time = map.TMObjective_AuthorTime;
 				if(super !is null && campaignMap) {
@@ -548,19 +563,25 @@ void Main() {
 				gold.time = map.TMObjective_GoldTime;
 				silver.time = map.TMObjective_SilverTime;
 				bronze.time = map.TMObjective_BronzeTime;
-				
+
 				// prevent 'leaking' a stale PB between maps
 				pbest.time = -1;
 				pbest.medal = 0;
-				
+
 				currentMapUid = map.MapInfo.MapUid;
 
 				limitMapNameLengthTime = Time::Now;
 				limitMapNameLengthTimeEnd = 0;
-				
+
+#if TMNEXT
+				champion.time = -1;
+				warrior.time = -1;
+				startnew(WaitForAdditionalMedalsTimes, currentMapUid);
+#endif
+
 				UpdateHidden();
 			}
-			
+
 #if TMNEXT
 			if(network.ClientManiaAppPlayground !is null) {
 				auto userMgr = network.ClientManiaAppPlayground.UserMgr;
@@ -570,13 +591,14 @@ void Main() {
 				} else {
 					userId.Value = uint(-1);
 				}
-				
+
 				auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
 				// from: OpenplanetNext\Extract\Titles\Trackmania\Scripts\Libs\Nadeo\TMNext\TrackMania\Menu\Constants.Script.txt
 				// ScopeType can be: "Season", "PersonalBest"
 				// GameMode can be: "TimeAttack", "Follow", "ClashTime"
 				pbest.time = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
 				pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+				UpdatePBMedalLabel();
 			}
 #elif TURBO
 			if(network.TmRaceRules !is null) {
@@ -605,7 +627,7 @@ void Main() {
 				pbest.medal = CalcMedal();
 			} else if(true) { // yes, this overrides the `else` below
 				int score = -1;
-				
+
 				// when playing on a server, TmRaceRules.ScoreMgr is unfortunately inaccessible
 				if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
 					// this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
@@ -631,7 +653,7 @@ void Main() {
 						}
 					}
 				}
-				
+
 				/* this is session-best, check this as well */
 				if(app.CurrentPlayground !is null
 						&& app.CurrentPlayground.GameTerminals.Length > 0
@@ -642,7 +664,7 @@ void Main() {
 						score = sessScore;
 					}
 				}
-				
+
 				pbest.time = score;
 				pbest.medal = CalcMedal();
 			}
@@ -650,8 +672,12 @@ void Main() {
 			else {
 				pbest.time = -1;
 				pbest.medal = 0;
+#if TMNEXT
+				champion.time = -1;
+				warrior.time = -1;
+#endif
 			}
-			
+
 		} else if(map is null || map.MapInfo.MapUid == "") {
 #if TMNEXT||MP4
 			author.time = -5;
@@ -667,12 +693,12 @@ void Main() {
 			bronze.time = -2;
 			pbest.time = -1;
 			pbest.medal = 0;
-			
+
 			currentMapUid = "";
 		}
-		
+
 		times.SortAsc();
-		
+
 		sleep(500);
 	}
 }
@@ -692,5 +718,12 @@ uint CalcMedal() {
 	else if(pbest <= silver) return 2;
 	else if(pbest <= bronze) return 1;
 	else return 0;
+}
+#endif
+
+#if TMNEXT
+void UpdatePBMedalLabel() {
+	if (pbest <= champion && ShowChampionMedals) pbest.medal = 5;
+	else if (pbest <= warrior && ShowWarriorMedals) pbest.medal = 6;
 }
 #endif
