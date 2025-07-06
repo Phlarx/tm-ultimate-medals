@@ -83,7 +83,7 @@ bool limitMapNameLength = true;
 [Setting category="Appearance" if="showMapName" name="Limit map name length width" description="Width in pixels to limit the map name length by. This requires \"Limit Map Name length\" to be enabled." min="100" max="400"]
 int limitMapNameLengthWidth = 275;
 
-[Setting category="Appearance" if="showMapName" name="Show map author name"]
+[Setting category="Appearance" name="Show map author name"]
 bool showAuthorName = false;
 
 [Setting category="Appearance" name="Show map comment on hover" description="An 'i' icon will appear next to the map name or author name, if a comment is available."]
