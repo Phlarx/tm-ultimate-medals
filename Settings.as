@@ -59,6 +59,15 @@ bool showPbestDelta = false;
 [Setting category="Additional Info" name="Show Personal Best Negative Delta Time"]
 bool showPbestDeltaNegative = true;
 
+[Setting category="Additional Info" name="Positive Color" color if="showPbestDelta"]
+vec3 deltaColorPositive = vec3(1.0f, 0.47f, 0.47f);
+
+[Setting category="Additional Info" name="Negative Color" color if="showPbestDelta"]
+vec3 deltaColorNegative = vec3(0.47f, 0.47f, 1.0f);
+
+[Setting category="Additional Info" name="Neutral Color" color if="showPbestDelta"]
+vec3 deltaColorNeutral = vec3(0.66f, 0.66f, 0.66f);
+
 [Setting category="Display Settings" name="Window visible" description="To adjust the position of the window, click and drag while the Openplanet overlay is visible."]
 bool windowVisible = true;
 
@@ -116,12 +125,3 @@ string bronzeText = "Bronze";
 
 [Setting category="Display Text" name="Personal Best Text" description="Override names to be shown in the window."]
 string pbestText = "Pers. Best";
-
-[Setting category="Colors" name="Positive Color"]
-vec3 positiveColor = vec3(255,119,119);
-
-[Setting category="Colors" name="Negative Color"]
-vec3 negativeColor = vec3(119,119,255);
-
-[Setting category="Colors" name="Neutral Color"]
-vec3 neutralColor = vec3(170,170,170);

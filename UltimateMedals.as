@@ -58,12 +58,20 @@ class Record {
 		}
 
 		int delta = other.time - this.time;
-		if (delta < 0 && showPbestDeltaNegative) {
-			UI::Text(Text::FormatOpenplanetColor(negativeColor/255.0) + "-" + Time::Format(delta * -1));
+		if (delta < 0) {
+			if (showPbestDeltaNegative) {
+				UI::PushStyleColor(UI::Col::Text, vec4(deltaColorNegative, 1));
+				UI::Text("-" + Time::Format(delta * -1));
+				UI::PopStyleColor();
+			}
 		} else if (delta > 0) {
-			UI::Text(Text::FormatOpenplanetColor(positiveColor/255.0) + "+" + Time::Format(delta));
+			UI::PushStyleColor(UI::Col::Text, vec4(deltaColorPositive, 1));
+			UI::Text("+" + Time::Format(delta));
+			UI::PopStyleColor();
 		} else {
-			UI::Text(Text::FormatOpenplanetColor(neutralColor/255.0) + "0:00.000");
+			UI::PushStyleColor(UI::Col::Text, vec4(deltaColorNeutral, 1));
+			UI::Text("0:00.000");
+			UI::PopStyleColor();
 		}
 	}
 
