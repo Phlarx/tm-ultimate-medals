@@ -74,6 +74,9 @@ string pbestText = "Pers. Best";
 [Setting category="Appearance" name="Show table header"]
 bool showHeader = true;
 
+[Setting category="Appearance" name="Table header text color" if="showHeader" color]
+vec4 tableHeaderTextColor = vec4(0.53f, 0.53f, 0.53f, 1);
+
 [Setting category="Appearance" name="Time column width" min="10" max="300"]
 int timeColumnWidth = 80;
 

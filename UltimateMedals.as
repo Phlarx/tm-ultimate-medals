@@ -200,6 +200,8 @@ void Render() {
 			if (showHeader) {
 				UI::TableNextRow();
 
+				UI::PushStyleColor(UI::Col::Text, tableHeaderTextColor);
+
 				if (showMedalIcons) {
 					UI::TableNextColumn();
 					// Medal icon has no header text
@@ -217,6 +219,8 @@ void Render() {
 					UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString("Delta").x);
 					UI::Text("Delta");
 				}
+
+				UI::PopStyleColor();
 			}
 
 			for(uint i = 0; i < times.Length; i++) {
