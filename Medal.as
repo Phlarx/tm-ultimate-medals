@@ -93,29 +93,3 @@ abstract class Medal
 		UI::PopStyleColor();
 	}
 }
-
-//todo: DrawIcon for Turbo Super Bronze/Silver/Gold
-/*
-UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize * UI::GetScale()));
-UI::Text(medals[this.medal]);
-UI::Text("\\$0f1" + Icons::CircleO);
-UI::PopStyleVar();
-*/
-
-//todo: Turbo visibility
-/*
-// If no super times, never show them
-stmaster.hidden = !showStmaster || stmaster.time < 0;
-sgold.hidden = !showSgold || stmaster.time < 0;
-ssilver.hidden = !showSsilver || stmaster.time < 0;
-sbronze.hidden = !showSbronze || stmaster.time < 0;
-*/
-
-//todo: turbo super gold/silver/bronze
-/*
-stmaster.time = int(super.m_time);
-auto delta = tmaster.time - stmaster.time;
-sgold.time = stmaster.time + (delta+4)/8;
-ssilver.time = stmaster.time + (delta+2)/4;
-sbronze.time = stmaster.time + (delta+1)/2;
-*/
