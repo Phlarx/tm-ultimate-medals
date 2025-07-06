@@ -35,7 +35,7 @@ bool showBronze = true;
 
 
 // Medal Names
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 [Setting category="Medal Names" name="Author Text"]
 string authorText = "Author";
 

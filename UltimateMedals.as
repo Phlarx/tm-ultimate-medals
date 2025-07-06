@@ -3,7 +3,7 @@ const array<string> medals = {
 	"\\$964" + Icons::Circle, // bronze medal
 	"\\$899" + Icons::Circle, // silver medal
 	"\\$db4" + Icons::Circle, // gold medal
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 	"\\$071" + Icons::Circle, // author medal
 #elif TURBO
 	"\\$0f1" + Icons::Circle, // trackmaster medal
@@ -14,7 +14,7 @@ const array<string> medals = {
 #endif
 };
 
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 Record@ author = Record(authorText, 4, -5);
 #elif TURBO
 Record@ stmaster = Record(stmasterText, 8, -9);
@@ -28,7 +28,7 @@ Record@ silver = Record(silverText, 2, -3);
 Record@ bronze = Record(bronzeText, 1, -2);
 Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
 
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 array<Record@> times = {author, gold, silver, bronze, pbest};
 #elif TURBO
 array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver, bronze, pbest};
@@ -65,7 +65,7 @@ void RenderMenu() {
 void Render() {
 	auto app = cast<CTrackMania>(GetApp());
 
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 	auto map = app.RootMap;
 #elif TURBO
 	auto map = app.Challenge;
@@ -277,7 +277,7 @@ void LoadFont() {
 }
 
 void UpdateHidden() {
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 	author.hidden = !showAuthor;
 #elif TURBO
 	// If no super times, never show them
@@ -294,7 +294,7 @@ void UpdateHidden() {
 }
 
 void UpdateText() {
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 	author.name = authorText;
 #elif TURBO
 	stmaster.name = stmasterText;
@@ -329,7 +329,7 @@ void Main() {
 	string currentMapUid = "";
 
 	while(true) {
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 		auto map = app.RootMap;
 #elif TURBO
 		auto map = app.Challenge;
@@ -337,7 +337,7 @@ void Main() {
 
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 			if(currentMapUid != map.MapInfo.MapUid) {
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 				author.time = map.TMObjective_AuthorTime;
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
@@ -467,7 +467,7 @@ void Main() {
 			}
 
 		} else if(map is null || map.MapInfo.MapUid == "") {
-#if TMNEXT||MP4
+#if TMNEXT || MP4
 			author.time = -5;
 #elif TURBO
 			stmaster.time = -9;
@@ -491,7 +491,7 @@ void Main() {
 	}
 }
 
-#if TURBO||MP4
+#if TURBO || MP4
 uint CalcMedal() {
 #if TURBO
 	if(pbest <= stmaster) return 8;
