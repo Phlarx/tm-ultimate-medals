@@ -114,7 +114,6 @@ bool campaignMap = false;
 int timeWidth = 53;
 int deltaWidth = 60;
 
-string loadedFontFace = "";
 UI::Font@ font = null;
 
 uint64 limitMapNameLengthTime = 0;
@@ -345,12 +344,17 @@ void setMinWidth(int width) {
 }
 
 void LoadFont() {
-	string fontFaceToLoad = fontFace.Length == 0 ? "DroidSans.ttf" : fontFace;
-	if(fontFaceToLoad != loadedFontFace) {
-		@font = UI::LoadFont(fontFaceToLoad, fontSize);
-		if(font !is null) {
-			loadedFontFace = fontFaceToLoad;
-		}
+	trace("Loading font");
+
+	if (fontFace == "") {
+		@font = UI::Font::Default;
+		return;
+	}
+
+	try {
+		@font = UI::LoadFont(fontFace);
+	} catch {
+		@font = UI::LoadSystemFont(fontFace);
 	}
 }
 
@@ -388,7 +392,6 @@ void UpdateText() {
 }
 
 void OnSettingsChanged() {
-	//LoadFont(); // Disabled dynamic font changes due to memory leak. See issue https://github.com/Phlarx/tm-ultimate-medals/issues/17
 	UpdateHidden();
 	UpdateText();
 }

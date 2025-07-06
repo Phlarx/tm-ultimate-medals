@@ -107,11 +107,19 @@ vec3 deltaColorNegative = vec3(0.47f, 0.47f, 1.0f);
 [Setting category="Appearance" name="Neutral Color" color if="showPbestDelta"]
 vec3 deltaColorNeutral = vec3(0.66f, 0.66f, 0.66f);
 
-[Setting category="Appearance" name="Font face" description="You must reload the plugin for the font change to be applied."]
+[Setting category="Appearance" name="Font face" afterrender="RenderSettingsReloadFont"]
 string fontFace = "";
 
 [Setting category="Appearance" name="Font size" min=8 max=48]
 int fontSize = 16;
+
+void RenderSettingsReloadFont()
+{
+	UI::SameLine();
+	if (UI::Button(Icons::Refresh + " Reload font")) {
+		LoadFont();
+	}
+}
 
 
 
