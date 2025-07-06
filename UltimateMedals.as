@@ -297,7 +297,7 @@ void Render() {
 					mapNameText = "#";
 				}
 #endif
-				mapNameText += StripFormatCodes(map.MapInfo.Name);
+				mapNameText += Text::StripFormatCodes(map.MapInfo.Name);
 				if (hasComment && !showAuthorName) {
 					mapNameText += " \\$68f" + Icons::InfoCircle;
 				}
@@ -366,7 +366,7 @@ void Render() {
 			if(showAuthorName) {
 				UI::TableNextRow();
 				UI::TableNextColumn();
-				string authorNameText = "\\$888by " + StripFormatCodes(map.MapInfo.AuthorNickName);
+				string authorNameText = "\\$888by " + Text::StripFormatCodes(map.MapInfo.AuthorNickName);
 				if (hasComment) {
 					authorNameText += " \\$68f" + Icons::InfoCircle;
 				}
