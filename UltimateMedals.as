@@ -334,7 +334,7 @@ void Main() {
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
-				author.time = 1234567; //map.TMObjective_AuthorTime;
+				author.time = map.TMObjective_AuthorTime;
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
 				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
