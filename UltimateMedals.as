@@ -77,10 +77,10 @@ vec2 anchor = vec2(0, 170);
 [Setting category="Display Settings" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
 
-[Setting category="Display Settings" name="Font face" description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
+[Setting category="Display Settings" name="Font face" description="You must reload the plugin for the font change to be applied."]
 string fontFace = "";
 
-[Setting category="Display Settings" name="Font size" min=8 max=48 description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
+[Setting category="Display Settings" name="Font size" min=8 max=48]
 int fontSize = 16;
 
 /* Custom names */
@@ -224,7 +224,6 @@ int timeWidth = 53;
 int deltaWidth = 60;
 
 string loadedFontFace = "";
-int loadedFontSize = 0;
 UI::Font@ font = null;
 
 uint64 limitMapNameLengthTime = 0;
@@ -276,7 +275,7 @@ void Render() {
 				windowFlags |= UI::WindowFlags::NoInputs;
 		}
 		
-		UI::PushFont(font);
+		UI::PushFont(font, fontSize);
 		
 		UI::Begin("Ultimate Medals", windowFlags);
 		
@@ -452,11 +451,10 @@ void setMinWidth(int width) {
 
 void LoadFont() {
 	string fontFaceToLoad = fontFace.Length == 0 ? "DroidSans.ttf" : fontFace;
-	if(fontFaceToLoad != loadedFontFace || fontSize != loadedFontSize) {
-		@font = UI::LoadFont(fontFaceToLoad, fontSize, -1, -1, true, true, true);
+	if(fontFaceToLoad != loadedFontFace) {
+		@font = UI::LoadFont(fontFaceToLoad, fontSize);
 		if(font !is null) {
 			loadedFontFace = fontFaceToLoad;
-			loadedFontSize = fontSize;
 		}
 	}
 }
