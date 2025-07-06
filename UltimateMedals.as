@@ -80,10 +80,10 @@ bool lockPosition = false;
 [Setting category="Display Settings" name="Right-align window" description="Makes it so the right side of the window rather than the left side remains fixed as window size changes."]
 bool rightAlign = false;
 
-[Setting category="Display Settings" name="Font face" description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
+[Setting category="Display Settings" name="Font face" description="You must reload the plugin for the font change to be applied."]
 string fontFace = "";
 
-[Setting category="Display Settings" name="Font size" min=8 max=48 description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
+[Setting category="Display Settings" name="Font size" min=8 max=48]
 int fontSize = 16;
 
 /* Custom names */
@@ -120,6 +120,15 @@ string bronzeText = "Bronze";
 [Setting category="Display Text" name="Personal Best Text" description="Override names to be shown in the window."]
 string pbestText = "Pers. Best";
 
+[Setting category="Colors" name="Positive Color"]
+vec3 positiveColor = vec3(255,119,119);
+
+[Setting category="Colors" name="Negative Color"]
+vec3 negativeColor = vec3(119,119,255);
+
+[Setting category="Colors" name="Neutral Color"]
+vec3 neutralColor = vec3(170,170,170);
+
 const array<string> medals = {
 	"\\$444" + Icons::Circle, // no medal
 	"\\$964" + Icons::Circle, // bronze medal
@@ -154,7 +163,7 @@ class Record {
 	void DrawIcon() {
 #if TURBO
 		if(5 <= this.medal && this.medal <= 7) {
-			UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize));
+			UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, -fontSize * UI::GetScale()));
 			UI::Text(medals[this.medal]);
 			UI::Text("\\$0f1" + Icons::CircleO);
 			UI::PopStyleVar();
@@ -181,9 +190,11 @@ class Record {
 
 		int delta = other.time - this.time;
 		if (delta < 0 && showPbestDeltaNegative) {
-			UI::Text("\\$77f-" + Time::Format(delta * -1));
-		} else if (delta >= 0) {
-			UI::Text("\\$f77+" + Time::Format(delta));
+			UI::Text(Text::FormatOpenplanetColor(negativeColor/255.0) + "-" + Time::Format(delta * -1));
+		} else if (delta > 0) {
+			UI::Text(Text::FormatOpenplanetColor(positiveColor/255.0) + "+" + Time::Format(delta));
+		} else {
+			UI::Text(Text::FormatOpenplanetColor(neutralColor/255.0) + "0:00.000");
 		}
 	}
 	
@@ -227,7 +238,6 @@ int timeWidth = 53;
 int deltaWidth = 60;
 
 string loadedFontFace = "";
-int loadedFontSize = 0;
 UI::Font@ font = null;
 
 uint64 limitMapNameLengthTime = 0;
@@ -280,7 +290,7 @@ void Render() {
 				windowFlags |= UI::WindowFlags::NoInputs;
 		}
 		
-		UI::PushFont(font);
+		UI::PushFont(font, fontSize);
 		
 		UI::Begin("Ultimate Medals", windowFlags);
 		
@@ -301,7 +311,7 @@ void Render() {
 					mapNameText = "#";
 				}
 #endif
-				mapNameText += StripFormatCodes(map.MapInfo.Name);
+				mapNameText += Text::StripFormatCodes(map.MapInfo.Name);
 				if (hasComment && !showAuthorName) {
 					mapNameText += " \\$68f" + Icons::InfoCircle;
 				}
@@ -370,7 +380,7 @@ void Render() {
 			if(showAuthorName) {
 				UI::TableNextRow();
 				UI::TableNextColumn();
-				string authorNameText = "\\$888by " + StripFormatCodes(map.MapInfo.AuthorNickName);
+				string authorNameText = "\\$888by " + Text::StripFormatCodes(map.MapInfo.AuthorNickName);
 				if (hasComment) {
 					authorNameText += " \\$68f" + Icons::InfoCircle;
 				}
@@ -458,17 +468,16 @@ void Render() {
 
 void setMinWidth(int width) {
 	UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, 0));
-	UI::Dummy(vec2(width, 0));
+	UI::Dummy(vec2(width * UI::GetScale(), 0));
 	UI::PopStyleVar();
 }
 
 void LoadFont() {
 	string fontFaceToLoad = fontFace.Length == 0 ? "DroidSans.ttf" : fontFace;
-	if(fontFaceToLoad != loadedFontFace || fontSize != loadedFontSize) {
-		@font = UI::LoadFont(fontFaceToLoad, fontSize, -1, -1, true, true, true);
+	if(fontFaceToLoad != loadedFontFace) {
+		@font = UI::LoadFont(fontFaceToLoad, fontSize);
 		if(font !is null) {
 			loadedFontFace = fontFaceToLoad;
-			loadedFontSize = fontSize;
 		}
 	}
 }
