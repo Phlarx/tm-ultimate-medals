@@ -130,7 +130,7 @@ void RenderSettingsReloadFont()
 [Setting category="Behavior" name="Window visible" description="To adjust the position of the window, click and drag while the Openplanet overlay is visible."]
 bool windowVisible = true;
 
-[Setting category="Behavior" name="Window visibility hotkey enabled"]
+[Setting category="Behavior" name="Enable window visibility hotkey"]
 bool windowVisibleKeyEnabled = false;
 
 [Setting category="Behavior" name="Window visibility hotkey" if="windowVisibleKeyEnabled"]
