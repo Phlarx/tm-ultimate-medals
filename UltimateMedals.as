@@ -104,7 +104,6 @@ void Render() {
 
 		bool hasComment = string(map.MapInfo.Comments).Length > 0;
 
-		UI::BeginGroup();
 		if(showMapName) {
 			string mapNameText = "";
 #if TURBO
@@ -240,7 +239,6 @@ void Render() {
 
 			UI::EndTable();
 		}
-		UI::EndGroup();
 
 		if(hasComment && showComment && UI::IsItemHovered()) {
 			UI::BeginTooltip();
