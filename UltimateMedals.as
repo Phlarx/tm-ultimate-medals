@@ -132,7 +132,11 @@ void OnKeyPress(bool down, VirtualKey key)
 }
 
 void RenderMenu() {
-	if(UI::MenuItem("\\$db4" + Icons::Circle + "\\$z Medals Window", "", windowVisible)) {
+	string strShortcut = "";
+	if (windowVisibleKeyEnabled) {
+		strShortcut = tostring(windowVisibleKey);
+	}
+	if(UI::MenuItem("\\$db4" + Icons::Circle + "\\$z Medals Window", strShortcut, windowVisible)) {
 		windowVisible = !windowVisible;
 	}
 }
