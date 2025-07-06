@@ -36,9 +36,6 @@ array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver
 bool campaignMap = false;
 #endif
 
-int timeWidth = 53;
-int deltaWidth = 60;
-
 UI::Font@ font = null;
 
 uint64 limitMapNameLengthTime = 0;
@@ -190,8 +187,17 @@ void Render() {
 		if(showMedalIcons) numCols++;
 		if(showPbestDelta) numCols++;
 
-		if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit)) {
-			if(showHeader) {
+		if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit | UI::TableFlags::NoSavedSettings)) {
+			if (showMedalIcons) {
+				UI::TableSetupColumn("##Icon");
+			}
+			UI::TableSetupColumn("Medal");
+			UI::TableSetupColumn("Time", UI::TableColumnFlags::WidthFixed, timeColumnWidth);
+			if (showPbestDelta) {
+				UI::TableSetupColumn("Delta", UI::TableColumnFlags::WidthFixed, timeColumnWidth);
+			}
+
+			if (showHeader) {
 				UI::TableNextRow();
 
 				if (showMedalIcons) {
@@ -200,16 +206,15 @@ void Render() {
 				}
 
 				UI::TableNextColumn();
-				setMinWidth(0);
 				UI::Text("Medal");
 
 				UI::TableNextColumn();
-				setMinWidth(timeWidth);
+				UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString("Time").x);
 				UI::Text("Time");
 
 				if (showPbestDelta) {
 					UI::TableNextColumn();
-					setMinWidth(deltaWidth);
+					UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString("Delta").x);
 					UI::Text("Delta");
 				}
 			}
@@ -252,12 +257,6 @@ void Render() {
 
 		UI::PopFont();
 	}
-}
-
-void setMinWidth(int width) {
-	UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, 0));
-	UI::Dummy(vec2(width * UI::GetScale(), 0));
-	UI::PopStyleVar();
 }
 
 void LoadFont() {
@@ -335,7 +334,7 @@ void Main() {
 		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
 			if(currentMapUid != map.MapInfo.MapUid) {
 #if TMNEXT||MP4
-				author.time = map.TMObjective_AuthorTime;
+				author.time = 1234567; //map.TMObjective_AuthorTime;
 #elif TURBO
 				int mapNumber = Text::ParseInt(map.MapName);
 				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";

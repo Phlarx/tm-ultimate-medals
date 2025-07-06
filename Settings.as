@@ -74,6 +74,9 @@ string pbestText = "Pers. Best";
 [Setting category="Appearance" name="Show table header"]
 bool showHeader = true;
 
+[Setting category="Appearance" name="Time column width" min="10" max="300"]
+int timeColumnWidth = 80;
+
 [Setting category="Appearance" name="Show map name"]
 bool showMapName = false;
 

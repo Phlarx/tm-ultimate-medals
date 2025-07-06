@@ -33,7 +33,9 @@ class Record {
 	}
 
 	void DrawTime() {
-		UI::Text(this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---"));
+		string strTime = this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---");
+		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(strTime).x);
+		UI::Text(strTime);
 	}
 
 	void DrawDelta(Record@ other) {
@@ -41,22 +43,27 @@ class Record {
 			return;
 		}
 
+		string str;
+		vec3 color;
+
 		int delta = other.time - this.time;
 		if (delta < 0) {
 			if (showPbestDeltaNegative) {
-				UI::PushStyleColor(UI::Col::Text, vec4(deltaColorNegative, 1));
-				UI::Text("-" + Time::Format(delta * -1));
-				UI::PopStyleColor();
+				str = "-" + Time::Format(delta * -1);
+				color = deltaColorNegative;
 			}
 		} else if (delta > 0) {
-			UI::PushStyleColor(UI::Col::Text, vec4(deltaColorPositive, 1));
-			UI::Text("+" + Time::Format(delta));
-			UI::PopStyleColor();
+			str = "+" + Time::Format(delta);
+			color = deltaColorPositive;
 		} else {
-			UI::PushStyleColor(UI::Col::Text, vec4(deltaColorNeutral, 1));
-			UI::Text("0:00.000");
-			UI::PopStyleColor();
+			str = "0:00.000";
+			color = deltaColorNeutral;
 		}
+
+		UI::PushStyleColor(UI::Col::Text, vec4(color, 1));
+		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(str).x);
+		UI::Text(str);
+		UI::PopStyleColor();
 	}
 
 	int opCmp(Record@ other) {
