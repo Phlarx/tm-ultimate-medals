@@ -57,13 +57,13 @@ namespace TurboSTM
 
 		auto superSoloFile = GetFile("Media/Config/TMConsole/Campaign/SuperSoloCampaign.xml");
 		if (Fids::Preload(superSoloFile) is null) {
-			print("Unable to preload SuperSoloCampaign file!");
+			error("Unable to preload SuperSoloCampaign file!");
 			return;
 		}
 
 		auto superSoloText = cast<CPlugFileText>(superSoloFile.Nod);
 		if (superSoloText is null) {
-			print("SuperSoloCampaign file is not a CPlugFileText file!");
+			error("SuperSoloCampaign file is not a CPlugFileText file!");
 			return;
 		}
 
@@ -74,7 +74,7 @@ namespace TurboSTM
 		// within the game, but I'm unsure so far.)
 		IO::FileSource superSoloFile("lib/SuperSoloCampaign.xml");
 		if (superSoloFile.Size() <= 0) {
-			print("Unable to access SuperSoloCampaign file!");
+			error("Unable to access SuperSoloCampaign file!");
 			return;
 		}
 
