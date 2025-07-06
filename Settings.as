@@ -78,7 +78,7 @@ bool showHeader = true;
 vec4 tableHeaderTextColor = vec4(0.53f, 0.53f, 0.53f, 1);
 
 [Setting category="Appearance" name="Time column width" min="10" max="300"]
-int timeColumnWidth = 80;
+int timeColumnWidth = 70;
 
 [Setting category="Appearance" name="Show map name"]
 bool showMapName = false;
