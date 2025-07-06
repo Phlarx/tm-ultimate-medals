@@ -344,8 +344,6 @@ void setMinWidth(int width) {
 }
 
 void LoadFont() {
-	trace("Loading font");
-
 	if (fontFace == "") {
 		@font = UI::Font::Default;
 		return;
