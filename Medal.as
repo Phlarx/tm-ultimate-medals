@@ -15,7 +15,11 @@ abstract class Medal
 	protected vec3 GetIconColor() { return vec3(0.5f); }
 
 	// Called on map change
-	void InvalidateAsync(CGameCtnChallenge@ map) { m_cachedScore = GetScoreAsync(map); }
+	void InvalidateAsync(CGameCtnChallenge@ map)
+	{
+		m_cachedScore = -1;
+		m_cachedScore = GetScoreAsync(map);
+	}
 
 	// Called every frame
 	void UpdateAsync(CGameCtnChallenge@ map) {}
