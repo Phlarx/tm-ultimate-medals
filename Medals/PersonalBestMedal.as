@@ -7,7 +7,7 @@ class PersonalBestMedal : Medal
 		int score = -1;
 
 		auto app = GetApp();
-		auto network = app.Network;
+		auto network = cast<CTrackManiaNetwork>(app.Network);
 
 #if TMNEXT
 

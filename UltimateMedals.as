@@ -76,7 +76,7 @@ void Render() {
 		if(showMapName) {
 			string mapNameText = "";
 #if TURBO
-			if (campaignMap) {
+			if (g_turboCampaignMap) {
 				mapNameText = "#";
 			}
 #endif
