@@ -1,55 +1,27 @@
-const array<string> medals = {
-	"\\$444" + Icons::Circle, // no medal
-	"\\$964" + Icons::Circle, // bronze medal
-	"\\$899" + Icons::Circle, // silver medal
-	"\\$db4" + Icons::Circle, // gold medal
-#if TMNEXT || MP4
-	"\\$071" + Icons::Circle, // author medal
-#elif TURBO
-	"\\$0f1" + Icons::Circle, // trackmaster medal
-	"\\$964" + Icons::Circle, // super bronze medal
-	"\\$899" + Icons::Circle, // super silver medal
-	"\\$db4" + Icons::Circle, // super gold medal
-	"\\$0ff" + Icons::Circle, // super trackmaster medal
+Medal@ g_personalBest = PersonalBestMedal();
+
+array<Medal@> g_medals = {
+#if TURBO
+	SuperTrackmasterMedal(), SuperGoldMedal(), SuperSilverMedal(), SuperBronzeMedal(),
 #endif
+	AuthorMedal(), GoldMedal(), SilverMedal(), BronzeMedal(), g_personalBest,
 };
 
-#if TMNEXT || MP4
-Record@ author = Record(authorText, 4, -5);
-#elif TURBO
-Record@ stmaster = Record(stmasterText, 8, -9);
-Record@ sgold = Record(sgoldText, 7, -8);
-Record@ ssilver = Record(ssilverText, 6, -7);
-Record@ sbronze = Record(sbronzeText, 5, -6);
-Record@ tmaster = Record(tmasterText, 4, -5);
-#endif
-Record@ gold = Record(goldText, 3, -4);
-Record@ silver = Record(silverText, 2, -3);
-Record@ bronze = Record(bronzeText, 1, -2);
-Record@ pbest = Record(pbestText, 0, -1, "\\$0ff");
-
-#if TMNEXT || MP4
-array<Record@> times = {author, gold, silver, bronze, pbest};
-#elif TURBO
-array<Record@> times = {stmaster, sgold, ssilver, sbronze, tmaster, gold, silver, bronze, pbest};
-
-bool campaignMap = false;
+#if TURBO
+bool g_turboCampaignMap = false;
+int g_turboCampaignMapNumber = 0;
 #endif
 
-UI::Font@ font = null;
+UI::Font@ g_font = null;
 
-uint64 limitMapNameLengthTime = 0;
-uint64 limitMapNameLengthTimeEnd = 0;
+uint64 g_limitMapNameLengthTime = 0;
+uint64 g_limitMapNameLengthTimeEnd = 0;
 
-
-bool held = false;
 void OnKeyPress(bool down, VirtualKey key)
 {
-	if(key == windowVisibleKey && !held)
-	{
+	if (down && key == windowVisibleKey) {
 		windowVisible = !windowVisible;
 	}
-	held = down;
 }
 
 void RenderMenu() {
@@ -91,7 +63,7 @@ void Render() {
 			windowFlags |= UI::WindowFlags::NoInputs;
 		}
 
-		UI::PushFont(font, fontSize);
+		UI::PushFont(g_font, fontSize);
 
 		UI::Begin("Ultimate Medals", windowFlags);
 
@@ -112,6 +84,7 @@ void Render() {
 			if (hasComment && !showAuthorName) {
 				mapNameText += " \\$68f" + Icons::InfoCircle;
 			}
+
 			if (limitMapNameLength) {
 				vec2 size = Draw::MeasureString(mapNameText);
 
@@ -128,14 +101,14 @@ void Render() {
 
 					// If the text is hovered, reset now
 					if (UI::IsItemHovered()) {
-						limitMapNameLengthTime = Time::Now;
-						limitMapNameLengthTimeEnd = 0;
+						g_limitMapNameLengthTime = Time::Now;
+						g_limitMapNameLengthTimeEnd = 0;
 					}
 
 					vec2 textPos = vec2(0, 0);
 
 					// Move the text forwards after the start time has passed
-					uint64 timeOffset = Time::Now - limitMapNameLengthTime;
+					uint64 timeOffset = Time::Now - g_limitMapNameLengthTime;
 					if (timeOffset > timeOffsetStart) {
 						uint64 moveTimeOffset = timeOffset - timeOffsetStart;
 						textPos.x = -(moveTimeOffset / scrollSpeed);
@@ -146,17 +119,17 @@ void Render() {
 						textPos.x = -(size.x - limitMapNameLengthWidth);
 
 						// Begin waiting for the end time
-						if (limitMapNameLengthTimeEnd == 0) {
-							limitMapNameLengthTimeEnd = Time::Now;
+						if (g_limitMapNameLengthTimeEnd == 0) {
+							g_limitMapNameLengthTimeEnd = Time::Now;
 						}
 					}
 
 					// Go back to the starting position after the end time has passed
-					if (limitMapNameLengthTimeEnd > 0) {
-						uint64 endTimeOffset = Time::Now - limitMapNameLengthTimeEnd;
+					if (g_limitMapNameLengthTimeEnd > 0) {
+						uint64 endTimeOffset = Time::Now - g_limitMapNameLengthTimeEnd;
 						if (endTimeOffset > timeOffsetEnd) {
-							limitMapNameLengthTime = Time::Now;
-							limitMapNameLengthTimeEnd = 0;
+							g_limitMapNameLengthTime = Time::Now;
+							g_limitMapNameLengthTimeEnd = 0;
 						}
 					}
 
@@ -173,14 +146,17 @@ void Render() {
 				// We don't care about the max length, so we render it normally
 				UI::Text(mapNameText);
 			}
+
+			if (hasComment && UI::BeginItemTooltip()) {
+				UI::PushTextWrapPos(200);
+				UI::TextWrapped(map.MapInfo.Comments);
+				UI::PopTextWrapPos();
+				UI::EndTooltip();
+			}
 		}
 
 		if(showAuthorName) {
-			string authorNameText = "\\$888by " + Text::StripFormatCodes(map.MapInfo.AuthorNickName);
-			if (hasComment) {
-				authorNameText += " \\$68f" + Icons::InfoCircle;
-			}
-			UI::Text(authorNameText);
+			UI::Text("\\$888by " + Text::StripFormatCodes(map.MapInfo.AuthorNickName));
 		}
 
 		int numCols = 2; // name and time columns are always shown
@@ -223,38 +199,26 @@ void Render() {
 				UI::PopStyleColor();
 			}
 
-			for(uint i = 0; i < times.Length; i++) {
-				if(times[i].hidden) {
+			for (uint i = 0; i < g_medals.Length; i++) {
+				Medal@ medal = g_medals[i];
+				if(!medal.IsVisible()) {
 					continue;
 				}
+
 				UI::TableNextRow();
 
-				if(showMedalIcons) {
-					UI::TableNextColumn();
-					times[i].DrawIcon();
+				Medal@ better, worse;
+				if (i > 0) {
+					@better = g_medals[i - 1];
+				}
+				if (i < g_medals.Length - 1) {
+					@worse = g_medals[i + 1];
 				}
 
-				UI::TableNextColumn();
-				times[i].DrawName();
-
-				UI::TableNextColumn();
-				times[i].DrawTime();
-
-				if (showPbestDelta) {
-					UI::TableNextColumn();
-					times[i].DrawDelta(pbest);
-				}
+				medal.Draw(better, worse);
 			}
 
 			UI::EndTable();
-		}
-
-		if(hasComment && showComment && UI::IsItemHovered()) {
-			UI::BeginTooltip();
-			UI::PushTextWrapPos(200);
-			UI::TextWrapped(map.MapInfo.Comments);
-			UI::PopTextWrapPos();
-			UI::EndTooltip();
 		}
 
 		UI::End();
@@ -265,246 +229,74 @@ void Render() {
 
 void LoadFont() {
 	if (fontFace == "") {
-		@font = UI::Font::Default;
+		@g_font = UI::Font::Default;
 		return;
 	}
 
 	try {
-		@font = UI::LoadFont(fontFace);
+		@g_font = UI::LoadFont(fontFace);
 	} catch {
-		@font = UI::LoadSystemFont(fontFace);
+		@g_font = UI::LoadSystemFont(fontFace);
 	}
-}
-
-void UpdateHidden() {
-#if TMNEXT || MP4
-	author.hidden = !showAuthor;
-#elif TURBO
-	// If no super times, never show them
-	stmaster.hidden = !showStmaster || stmaster.time < 0;
-	sgold.hidden = !showSgold || stmaster.time < 0;
-	ssilver.hidden = !showSsilver || stmaster.time < 0;
-	sbronze.hidden = !showSbronze || stmaster.time < 0;
-	tmaster.hidden = !showTmaster;
-#endif
-	gold.hidden = !showGold;
-	silver.hidden = !showSilver;
-	bronze.hidden = !showBronze;
-	pbest.hidden = !showPbest;
-}
-
-void UpdateText() {
-#if TMNEXT || MP4
-	author.name = authorText;
-#elif TURBO
-	stmaster.name = stmasterText;
-	sgold.name = sgoldText;
-	ssilver.name = ssilverText;
-	sbronze.name = sbronzeText;
-	tmaster.name = tmasterText;
-#endif
-	gold.name = goldText;
-	silver.name = silverText;
-	bronze.name = bronzeText;
-	pbest.name = pbestText;
-}
-
-void OnSettingsChanged() {
-	UpdateHidden();
-	UpdateText();
 }
 
 void Main() {
 	auto app = cast<CTrackMania>(GetApp());
-	auto network = cast<CTrackManiaNetwork>(app.Network);
+
+	for (uint i = 0; i < g_medals.Length; i++) {
+		g_medals[i].m_defaultOrder = i;
+	}
 
 #if TURBO
 	TurboSTM::Initialize();
 #endif
 
 	LoadFont();
-	UpdateHidden();
-	UpdateText();
 
-	string currentMapUid = "";
+	string currentMapUid;
 
 	while(true) {
+		if(windowVisible) {
 #if TMNEXT || MP4
-		auto map = app.RootMap;
+			auto map = app.RootMap;
 #elif TURBO
-		auto map = app.Challenge;
+			auto map = app.Challenge;
 #endif
 
-		if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
-			if(currentMapUid != map.MapInfo.MapUid) {
-#if TMNEXT || MP4
-				author.time = map.TMObjective_AuthorTime;
-#elif TURBO
-				int mapNumber = Text::ParseInt(map.MapName);
-				campaignMap = mapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
+			if(map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
+				if(currentMapUid != map.MapInfo.MapUid) {
+					currentMapUid = map.MapInfo.MapUid;
 
-				auto super = TurboSTM::GetSuperTime(mapNumber);
-				tmaster.time = map.TMObjective_AuthorTime;
-				if(super !is null && campaignMap) {
-					// we check campaignMap so that a successful parse on a different map doesn't give a false positive
-					stmaster.time = int(super.m_time);
-					auto delta = tmaster.time - stmaster.time;
-					sgold.time = stmaster.time + (delta+4)/8;
-					ssilver.time = stmaster.time + (delta+2)/4;
-					sbronze.time = stmaster.time + (delta+1)/2;
-				} else {
-					stmaster.time = -9;
-					sgold.time = -8;
-					ssilver.time = -7;
-					sbronze.time = -6;
-				}
+#if TURBO
+					g_turboCampaignMapNumber = Text::ParseInt(map.MapName);
+					g_turboCampaignMap = g_turboCampaignMapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
 #endif
-				gold.time = map.TMObjective_GoldTime;
-				silver.time = map.TMObjective_SilverTime;
-				bronze.time = map.TMObjective_BronzeTime;
 
-				// prevent 'leaking' a stale PB between maps
-				pbest.time = -1;
-				pbest.medal = 0;
+					g_limitMapNameLengthTime = Time::Now;
+					g_limitMapNameLengthTimeEnd = 0;
 
-				currentMapUid = map.MapInfo.MapUid;
-
-				limitMapNameLengthTime = Time::Now;
-				limitMapNameLengthTimeEnd = 0;
-
-				UpdateHidden();
-			}
-
-#if TMNEXT
-			if(network.ClientManiaAppPlayground !is null) {
-				auto userMgr = network.ClientManiaAppPlayground.UserMgr;
-				MwId userId;
-				if (userMgr.Users.Length > 0) {
-					userId = userMgr.Users[0].Id;
-				} else {
-					userId.Value = uint(-1);
-				}
-
-				auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
-				// from: OpenplanetNext\Extract\Titles\Trackmania\Scripts\Libs\Nadeo\TMNext\TrackMania\Menu\Constants.Script.txt
-				// ScopeType can be: "Season", "PersonalBest"
-				// GameMode can be: "TimeAttack", "Follow", "ClashTime"
-				pbest.time = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-				pbest.medal = scoreMgr.Map_GetMedal(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-			}
-#elif TURBO
-			if(network.TmRaceRules !is null) {
-				auto dataMgr = network.TmRaceRules.DataMgr;
-				//dataMgr.RetrieveRecords(map.MapInfo, dataMgr.MenuUserId);
-				dataMgr.RetrieveRecordsNoMedals(map.MapInfo.MapUid, dataMgr.MenuUserId);
-				yield();
-				if(dataMgr.Ready) {
-					for(uint i = 0; i < dataMgr.Records.Length; i++) {
-						// TODO: identify game mode, and then load arcade or dual-driver best instead? only loads for campaign maps right now
-						if(dataMgr.Records[i].GhostName == "Solo_BestGhost") {
-							pbest.time = dataMgr.Records[i].Time;
-							pbest.medal = CalcMedal();
-							break;
-						}
-						// this shouldn't loop more than a few times, since each entry is a different record type
-					}
-				}
-			}
-#elif MP4
-			// don't use network.ClientManiaAppPlayground.ScoreMgr because that always returns -1
-			if(network.TmRaceRules !is null && network.TmRaceRules.ScoreMgr !is null) {
-				auto scoreMgr = network.TmRaceRules.ScoreMgr;
-				// after extensive research, I have concluded that Context must be ""
-				pbest.time = scoreMgr.Map_GetRecord(network.PlayerInfo.Id, map.MapInfo.MapUid, "");
-				pbest.medal = CalcMedal();
-			} else if(true) { // yes, this overrides the `else` below
-				int score = -1;
-
-				// when playing on a server, TmRaceRules.ScoreMgr is unfortunately inaccessible
-				if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
-					// this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
-					for(uint i = 0; i < app.ReplayRecordInfos.Length; i++) {
-						if(app.ReplayRecordInfos[i] !is null
-							 && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
-							 && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
-							auto record = app.ReplayRecordInfos[i];
-							if(score < 0 || record.BestTime < uint(score)) {
-								score = int(record.BestTime);
-							}
-						}
-						// to prevent lag spikes when updating medals, scan at most 256 per tick
-						if(i & 0xff == 0xff) {
-							yield();
-							// since we're yielding, it's possible for a race condition to occur, and things to get yanked out
-							// from under our feet; look for this case and bail if it happens
-							if(app.CurrentProfile is null || app.CurrentProfile.AccountSettings is null
-									|| app.ReplayRecordInfos.Length <= i) {
-								warn("Game state changed while scanning records. Retrying in 500ms...");
-								break;
-							}
-						}
+					foreach (Medal@ medal : g_medals) {
+						medal.InvalidateAsync(map);
 					}
 				}
 
-				/* this is session-best, check this as well */
-				if(app.CurrentPlayground !is null
-						&& app.CurrentPlayground.GameTerminals.Length > 0
-						&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer) !is null
-						&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score !is null) {
-					int sessScore = int(cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score.BestTime);
-					if(sessScore > 0 && (score < 0 || sessScore < score)) {
-						score = sessScore;
-					}
+				foreach (Medal@ medal : g_medals) {
+					medal.UpdateAsync(map);
 				}
-
-				pbest.time = score;
-				pbest.medal = CalcMedal();
-			}
-#endif
-			else {
-				pbest.time = -1;
-				pbest.medal = 0;
+			} else if(map is null || map.MapInfo.MapUid == "") {
+				currentMapUid = "";
 			}
 
-		} else if(map is null || map.MapInfo.MapUid == "") {
-#if TMNEXT || MP4
-			author.time = -5;
-#elif TURBO
-			stmaster.time = -9;
-			sgold.time = -8;
-			ssilver.time = -7;
-			sbronze.time = -6;
-			tmaster.time = -5;
-#endif
-			gold.time = -4;
-			silver.time = -3;
-			bronze.time = -2;
-			pbest.time = -1;
-			pbest.medal = 0;
-
-			currentMapUid = "";
+			g_medals.Sort(function(const Medal@ const &in a, const Medal@ const &in b) {
+				int sa = a.GetCachedScore();
+				int sb = b.GetCachedScore();
+				if (sa == sb) {
+					return a.m_defaultOrder < b.m_defaultOrder;
+				}
+				return sa < sb;
+			});
 		}
 
-		times.SortAsc();
-
-		sleep(500);
+		yield();
 	}
 }
-
-#if TURBO || MP4
-uint CalcMedal() {
-#if TURBO
-	if(pbest <= stmaster) return 8;
-	else if(pbest <= sgold) return 7;
-	else if(pbest <= ssilver) return 6;
-	else if(pbest <= sbronze) return 5;
-	else if(pbest <= tmaster) return 4;
-#elif MP4
-	if(pbest <= author) return 4;
-#endif
-	else if(pbest <= gold) return 3;
-	else if(pbest <= silver) return 2;
-	else if(pbest <= bronze) return 1;
-	else return 0;
-}
-#endif
