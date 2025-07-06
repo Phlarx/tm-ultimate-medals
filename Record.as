@@ -56,7 +56,7 @@ class Record {
 			str = "+" + Time::Format(delta);
 			color = deltaColorPositive;
 		} else {
-			str = "0:00.000";
+			str = "-:--.---";
 			color = deltaColorNeutral;
 		}
 
