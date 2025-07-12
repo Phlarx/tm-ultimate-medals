@@ -34,6 +34,17 @@ void RenderMenu() {
 	}
 }
 
+void RenderMapComment(const string &in comment) {
+	UI::SameLine();
+	UI::Text("\\$68f" + Icons::InfoCircle);
+	if (UI::BeginItemTooltip()) {
+		UI::PushTextWrapPos(400);
+		UI::TextWrapped(comment);
+		UI::PopTextWrapPos();
+		UI::EndTooltip();
+	}
+}
+
 void Render() {
 	auto app = cast<CTrackMania>(GetApp());
 
@@ -71,7 +82,8 @@ void Render() {
 			anchor = UI::GetWindowPos();
 		}
 
-		bool hasComment = string(map.MapInfo.Comments).Length > 0;
+		string mapComment = map.MapInfo.Comments;
+		bool hasComment = mapComment.Length > 0;
 
 		if(showMapName) {
 			string mapNameText = "";
@@ -81,9 +93,6 @@ void Render() {
 			}
 #endif
 			mapNameText += Text::StripFormatCodes(map.MapInfo.Name);
-			if (hasComment && !showAuthorName) {
-				mapNameText += " \\$68f" + Icons::InfoCircle;
-			}
 
 			if (limitMapNameLength) {
 				vec2 size = Draw::MeasureString(mapNameText);
@@ -146,17 +155,14 @@ void Render() {
 				// We don't care about the max length, so we render it normally
 				UI::Text(mapNameText);
 			}
-
-			if (hasComment && UI::BeginItemTooltip()) {
-				UI::PushTextWrapPos(200);
-				UI::TextWrapped(map.MapInfo.Comments);
-				UI::PopTextWrapPos();
-				UI::EndTooltip();
-			}
 		}
 
 		if(showAuthorName) {
-			UI::Text("\\$888by " + Text::StripFormatCodes(map.MapInfo.AuthorNickName));
+			UI::TextDisabled("by " + Text::StripFormatCodes(map.MapInfo.AuthorNickName));
+		}
+
+		if (hasComment && showComment) {
+			RenderMapComment(mapComment);
 		}
 
 		int numCols = 2; // name and time columns are always shown
