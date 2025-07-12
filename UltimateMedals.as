@@ -296,6 +296,9 @@ void Main() {
 			g_medals.Sort(function(const Medal@ const &in a, const Medal@ const &in b) {
 				int sa = a.GetCachedScore();
 				int sb = b.GetCachedScore();
+				if (sa == -1 && sb != -1) {
+					return false;
+				}
 				if (sa == sb) {
 					return a.m_defaultOrder < b.m_defaultOrder;
 				}
