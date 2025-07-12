@@ -62,7 +62,7 @@ void Render() {
 		return;
 	}
 
-	if(windowVisible && map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
+	if(windowVisible && map !is null && map.IdName != "" && app.Editor is null) {
 		if(lockPosition) {
 			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
 		} else {
@@ -158,7 +158,7 @@ void Render() {
 		}
 
 		if(showAuthorName) {
-			UI::TextDisabled("by " + Text::StripFormatCodes(map.MapInfo.AuthorNickName));
+			UI::TextDisabled("by " + Text::StripFormatCodes(map.AuthorNickName));
 		}
 
 		if (hasComment && showComment) {
@@ -262,34 +262,38 @@ void Main() {
 	string currentMapUid;
 
 	while(true) {
-		if(windowVisible) {
+		if(windowVisible && app.Editor is null) {
 #if TMNEXT || MP4
 			auto map = app.RootMap;
 #elif TURBO
 			auto map = app.Challenge;
 #endif
 
-			if(map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
-				if(currentMapUid != map.MapInfo.MapUid) {
-					currentMapUid = map.MapInfo.MapUid;
+			if(map !is null) {
+				string uid = map.IdName;
 
-#if TURBO
-					g_turboCampaignMapNumber = Text::ParseInt(map.MapName);
-					g_turboCampaignMap = g_turboCampaignMapNumber != 0 && map.MapInfo.AuthorLogin == "Nadeo";
-#endif
+				if (uid != "") {
+					if(currentMapUid != uid) {
+						currentMapUid = uid;
 
-					g_limitMapNameLengthTime = Time::Now;
-					g_limitMapNameLengthTimeEnd = 0;
+	#if TURBO
+						g_turboCampaignMapNumber = Text::ParseInt(map.MapName);
+						g_turboCampaignMap = g_turboCampaignMapNumber != 0 && map.AuthorLogin == "Nadeo";
+	#endif
 
-					foreach (Medal@ medal : g_medals) {
-						medal.InvalidateAsync(map);
+						g_limitMapNameLengthTime = Time::Now;
+						g_limitMapNameLengthTimeEnd = 0;
+
+						foreach (Medal@ medal : g_medals) {
+							medal.InvalidateAsync(map);
+						}
 					}
 				}
 
 				foreach (Medal@ medal : g_medals) {
 					medal.UpdateAsync(map);
 				}
-			} else if(map is null || map.MapInfo.MapUid == "") {
+			} else {
 				currentMapUid = "";
 			}
 
@@ -298,6 +302,8 @@ void Main() {
 				int sb = b.GetCachedScore();
 				if (sa == -1 && sb != -1) {
 					return false;
+				} else if (sa != -1 && sb == -1) {
+					return true;
 				}
 				if (sa == sb) {
 					return a.m_defaultOrder < b.m_defaultOrder;
