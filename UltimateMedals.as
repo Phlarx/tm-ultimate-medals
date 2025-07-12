@@ -1,4 +1,4 @@
-Medal@ g_personalBest = PersonalBestMedal();
+PersonalBestMedal@ g_personalBest = CreatePersonalBestMedal();
 
 array<Medal@> g_medals = {
 #if TURBO
