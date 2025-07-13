@@ -14,7 +14,7 @@ abstract class Medal
 	protected int GetScoreAsync(CGameCtnChallenge@ map) { return -1; }
 	protected vec3 GetIconColor() { return vec3(0.5f); }
 
-	// Called on map change
+	// Called whenever the medal should update (such as on map change)
 	void InvalidateAsync(CGameCtnChallenge@ map, bool clearScore = false)
 	{
 		if (clearScore) {
