@@ -10,7 +10,6 @@ class ManiaplanetPersonalBestMedal : PersonalBestMedal
 		auto network = cast<CTrackManiaNetwork>(app.Network);
 
 		CGameScoreAndLeaderBoardManagerScript@ scoreMgr;
-
 		if (network.TmRaceRules !is null && network.TmRaceRules.ScoreMgr !is null) {
 			@scoreMgr = network.TmRaceRules.ScoreMgr;
 		} else if (network.ClientManiaAppPlayground !is null) {
