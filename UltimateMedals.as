@@ -63,11 +63,7 @@ void Render() {
 	}
 
 	if(windowVisible && map !is null && map.IdName != "" && app.Editor is null) {
-		if(lockPosition) {
-			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
-		} else {
-			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::FirstUseEver);
-		}
+		UI::SetNextWindowPos(int(anchor.x), int(anchor.y), lockPosition ? UI::Cond::Always : UI::Cond::FirstUseEver);
 
 		int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
 		if (!UI::IsOverlayShown()) {
