@@ -22,13 +22,13 @@ class ManiaplanetPersonalBestMedal : PersonalBestMedal
 		}
 
 		// this is session-best, check this as well
-		if(app.CurrentPlayground !is null
-				&& app.CurrentPlayground.GameTerminals.Length > 0
-				&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer) !is null
-				&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score !is null) {
-			int sessScore = int(cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score.BestTime);
-			if(sessScore > 0 && (score < 0 || sessScore < score)) {
-				score = sessScore;
+		if(app.CurrentPlayground !is null && app.CurrentPlayground.GameTerminals.Length > 0) {
+			auto player = cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer);
+			if (player !is null && player.Score !is null) {
+				int sessScore = int(player.Score.BestTime);
+				if(sessScore > 0 && (score < 0 || sessScore < score)) {
+					score = sessScore;
+				}
 			}
 		}
 
