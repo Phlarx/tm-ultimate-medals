@@ -31,15 +31,12 @@ class ManiaplanetPersonalBestMedal : PersonalBestMedal
 			}
 		}
 
-		/*
-		// when playing on a server, TmRaceRules.ScoreMgr is unfortunately inaccessible
-		if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
+		// Optionally, we may want to find the record through AutoSaves (this is pretty slow)
+		if(searchAutoSaves && app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
 			// this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
 			for(uint i = 0; i < app.ReplayRecordInfos.Length; i++) {
-				if(app.ReplayRecordInfos[i] !is null
-					 && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
-					 && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
-					auto record = app.ReplayRecordInfos[i];
+				auto record = app.ReplayRecordInfos[i];
+				if(record !is null && record.MapUid == map.IdName && record.PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
 					if(score < 0 || record.BestTime < uint(score)) {
 						score = int(record.BestTime);
 					}
@@ -49,15 +46,13 @@ class ManiaplanetPersonalBestMedal : PersonalBestMedal
 					yield();
 					// since we're yielding, it's possible for a race condition to occur, and things to get yanked out
 					// from under our feet; look for this case and bail if it happens
-					if(app.CurrentProfile is null || app.CurrentProfile.AccountSettings is null
-							|| app.ReplayRecordInfos.Length <= i) {
+					if(app.CurrentProfile is null || app.CurrentProfile.AccountSettings is null || app.ReplayRecordInfos.Length <= i) {
 						warn("Game state changed while scanning records. Retrying...");
 						break;
 					}
 				}
 			}
 		}
-		*/
 
 		return score;
 	}

@@ -150,3 +150,8 @@ vec2 anchor = vec2(0, 170);
 
 [Setting category="Behavior" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
+
+#if MP4
+[Setting category="Behavior" name="ManiaPlanet: Search AutoSaves to find Personal Best" description="Note: This is pretty slow and not recommended."]
+bool searchAutoSaves = false;
+#endif
