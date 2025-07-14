@@ -272,10 +272,10 @@ void Main() {
 					if(currentMapUid != uid) {
 						currentMapUid = uid;
 
-	#if TURBO
+#if TURBO
 						g_turboCampaignMapNumber = Text::ParseInt(map.MapName);
 						g_turboCampaignMap = g_turboCampaignMapNumber != 0 && map.AuthorLogin == "Nadeo";
-	#endif
+#endif
 
 						g_limitMapNameLengthTime = Time::Now;
 						g_limitMapNameLengthTimeEnd = 0;
