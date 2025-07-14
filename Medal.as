@@ -64,7 +64,17 @@ abstract class Medal
 
 	void DrawScore()
 	{
-		string str = m_cachedScore > 0 ? Time::Format(m_cachedScore) : "-:--.---";
+		string str;
+		switch (g_scoreUnit) {
+		case ScoreUnit::Time:
+			str = m_cachedScore > 0 ? Time::Format(m_cachedScore) : "-:--.---";
+			break;
+
+		case ScoreUnit::Points:
+		case ScoreUnit::Respawns:
+			str = m_cachedScore > 0 ? tostring(m_cachedScore) : "-";
+			break;
+		}
 		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(str).x);
 		UI::Text(str);
 	}
@@ -75,22 +85,54 @@ abstract class Medal
 			return;
 		}
 
+		int delta = other.m_cachedScore - m_cachedScore;
+
+		if (delta < 0 && !showPbestDeltaNegative) {
+			return;
+		}
+
 		string str;
 		vec3 color;
 
-		int delta = other.m_cachedScore - m_cachedScore;
-		if (delta < 0) {
-			if (!showPbestDeltaNegative) {
-				return;
-			}
-			str = "-" + Time::Format(delta * -1);
-			color = deltaColorNegative;
-		} else if (delta > 0) {
-			str = "+" + Time::Format(delta);
-			color = deltaColorPositive;
-		} else {
-			str = "-:--.---";
-			color = deltaColorNeutral;
+		switch (g_scoreUnit) {
+			case ScoreUnit::Time:
+				if (delta < 0) {
+					str = "-" + Time::Format(delta * -1);
+					color = deltaColorNegative;
+				} else if (delta > 0) {
+					str = "+" + Time::Format(delta);
+					color = deltaColorPositive;
+				} else {
+					str = "-:--.---";
+					color = deltaColorNeutral;
+				}
+				break;
+
+			case ScoreUnit::Points:
+				if (delta < 0) {
+					str = "+" + delta * -1;
+					color = deltaColorPositive;
+				} else if (delta > 0) {
+					str = "-" + delta;
+					color = deltaColorNegative;
+				} else {
+					str = "-";
+					color = deltaColorNeutral;
+				}
+				break;
+
+			case ScoreUnit::Respawns:
+				if (delta < 0) {
+					str = tostring(delta);
+					color = deltaColorNegative;
+				} else if (delta > 0) {
+					str = "+" + delta;
+					color = deltaColorPositive;
+				} else {
+					str = "-";
+					color = deltaColorNeutral;
+				}
+				break;
 		}
 
 		UI::PushStyleColor(UI::Col::Text, vec4(color, 1));

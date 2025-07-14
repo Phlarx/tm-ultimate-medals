@@ -1,3 +1,23 @@
+enum ScoreUnit
+{
+	Time,
+	Points,
+	Respawns,
+}
+
+// Matches "C_GameMode_" constants
+enum GameMode
+{
+	TimeAttack,
+	ClashTime,
+	Follow,
+	Stunt,
+	Platform
+}
+
+ScoreUnit g_scoreUnit;
+GameMode g_gameMode;
+
 PersonalBestMedal@ g_personalBest = CreatePersonalBestMedal();
 
 array<Medal@> g_medals = {
@@ -170,9 +190,9 @@ void Render() {
 				UI::TableSetupColumn("##Icon");
 			}
 			UI::TableSetupColumn("Medal");
-			UI::TableSetupColumn("Time", UI::TableColumnFlags::WidthFixed, timeColumnWidth);
+			UI::TableSetupColumn("Score", UI::TableColumnFlags::WidthFixed, scoreColumnWidth);
 			if (showPbestDelta) {
-				UI::TableSetupColumn("Delta", UI::TableColumnFlags::WidthFixed, timeColumnWidth);
+				UI::TableSetupColumn("Delta", UI::TableColumnFlags::WidthFixed, scoreColumnWidth);
 			}
 
 			if (showHeader) {
@@ -189,8 +209,8 @@ void Render() {
 				UI::Text("Medal");
 
 				UI::TableNextColumn();
-				UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString("Time").x);
-				UI::Text("Time");
+				UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(tostring(g_scoreUnit)).x);
+				UI::Text(tostring(g_scoreUnit));
 
 				if (showPbestDelta) {
 					UI::TableNextColumn();
@@ -277,6 +297,17 @@ void Main() {
 						g_turboCampaignMap = g_turboCampaignMapNumber != 0 && map.AuthorLogin == "Nadeo";
 #endif
 
+						if (map.MapType == "TrackMania\\TM_Stunt") {
+							g_scoreUnit = ScoreUnit::Points;
+							g_gameMode = GameMode::Stunt;
+						} else if (map.MapType == "TrackMania\\TM_Platform") {
+							g_scoreUnit = ScoreUnit::Respawns;
+							g_gameMode = GameMode::Platform;
+						} else {
+							g_scoreUnit = ScoreUnit::Time;
+							g_gameMode = GameMode::TimeAttack;
+						}
+
 						g_limitMapNameLengthTime = Time::Now;
 						g_limitMapNameLengthTimeEnd = 0;
 
@@ -301,10 +332,28 @@ void Main() {
 				} else if (sa != -1 && sb == -1) {
 					return true;
 				}
-				if (sa == sb) {
-					return a.m_defaultOrder < b.m_defaultOrder;
+
+				switch (g_scoreUnit) {
+					case ScoreUnit::Time:
+						if (sa == sb) {
+							return a.m_defaultOrder < b.m_defaultOrder;
+						}
+						return sa < sb;
+
+					case ScoreUnit::Respawns:
+						if (sa == sb) {
+							return a.m_defaultOrder > b.m_defaultOrder;
+						}
+						return sa < sb;
+
+					case ScoreUnit::Points:
+						if (sa == sb) {
+							return a.m_defaultOrder < b.m_defaultOrder;
+						}
+						return sa >= sb;
 				}
-				return sa < sb;
+
+				return false;
 			});
 		}
 
