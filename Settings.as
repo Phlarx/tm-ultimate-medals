@@ -77,8 +77,8 @@ bool showHeader = true;
 [Setting category="Appearance" name="Table header text color" if="showHeader" color]
 vec4 tableHeaderTextColor = vec4(0.53f, 0.53f, 0.53f, 1);
 
-[Setting category="Appearance" name="Score column width" min="10" max="300"]
-int scoreColumnWidth = 70;
+[Setting category="Appearance" name="Table column width" min="10" max="300"]
+int tableColumnWidth = 70;
 
 [Setting category="Appearance" name="Show map name"]
 bool showMapName = false;

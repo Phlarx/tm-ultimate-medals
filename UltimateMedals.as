@@ -190,9 +190,13 @@ void Render() {
 				UI::TableSetupColumn("##Icon");
 			}
 			UI::TableSetupColumn("Medal");
-			UI::TableSetupColumn("Score", UI::TableColumnFlags::WidthFixed, scoreColumnWidth);
+
+			int scoreUnitTextWidth = Draw::MeasureString(tostring(g_scoreUnit)).x;
+			int deltaTextWidth = Draw::MeasureString("Delta").x;
+
+			UI::TableSetupColumn("Score", UI::TableColumnFlags::WidthFixed, Math::Max(scoreUnitTextWidth, tableColumnWidth));
 			if (showPbestDelta) {
-				UI::TableSetupColumn("Delta", UI::TableColumnFlags::WidthFixed, scoreColumnWidth);
+				UI::TableSetupColumn("Delta", UI::TableColumnFlags::WidthFixed, Math::Max(deltaTextWidth, tableColumnWidth));
 			}
 
 			if (showHeader) {
@@ -209,12 +213,12 @@ void Render() {
 				UI::Text("Medal");
 
 				UI::TableNextColumn();
-				UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(tostring(g_scoreUnit)).x);
+				UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - scoreUnitTextWidth);
 				UI::Text(tostring(g_scoreUnit));
 
 				if (showPbestDelta) {
 					UI::TableNextColumn();
-					UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString("Delta").x);
+					UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - deltaTextWidth);
 					UI::Text("Delta");
 				}
 
