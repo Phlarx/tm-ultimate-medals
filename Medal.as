@@ -44,7 +44,9 @@ abstract class Medal
 
 		if (showPbestDelta) {
 			UI::TableNextColumn();
-			DrawDelta(g_personalBest);
+			if (g_personalBest !is this) {
+				DrawDelta(g_personalBest);
+			}
 		}
 
 		@m_better = @m_worse = null;
@@ -71,8 +73,11 @@ abstract class Medal
 			break;
 
 		case ScoreUnit::Points:
-		case ScoreUnit::Respawns:
 			str = m_cachedScore > 0 ? tostring(m_cachedScore) : "-";
+			break;
+
+		case ScoreUnit::Respawns:
+			str = m_cachedScore >= 0 ? tostring(m_cachedScore) : "-";
 			break;
 		}
 		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(str).x);
@@ -81,12 +86,11 @@ abstract class Medal
 
 	void DrawDelta(Medal@ other)
 	{
-		if (other is this || other.m_cachedScore <= 0) {
+		if (other.m_cachedScore < 0) {
 			return;
 		}
 
 		int delta = other.m_cachedScore - m_cachedScore;
-
 		if (delta < 0 && !showPbestDeltaNegative) {
 			return;
 		}
