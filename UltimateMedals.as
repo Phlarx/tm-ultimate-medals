@@ -191,8 +191,8 @@ void Render() {
 			}
 			UI::TableSetupColumn("Medal");
 
-			int scoreUnitTextWidth = Draw::MeasureString(tostring(g_scoreUnit)).x;
-			int deltaTextWidth = Draw::MeasureString("Delta").x;
+			int scoreUnitTextWidth = int(Draw::MeasureString(tostring(g_scoreUnit)).x);
+			int deltaTextWidth = int(Draw::MeasureString("Delta").x);
 
 			UI::TableSetupColumn("Score", UI::TableColumnFlags::WidthFixed, Math::Max(scoreUnitTextWidth, tableColumnWidth));
 			if (showPbestDelta) {
