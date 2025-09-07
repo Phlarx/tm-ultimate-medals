@@ -43,7 +43,7 @@ class SuperGoldMedal : SuperBaseMedal
 	{
 		int stm = SuperMedal::GetScoreAsync(map);
 		int delta = map.TMObjective_AuthorTime - stm;
-		return stm + (delta + 4) / 8;
+		return Math::Round(stm + (delta / 8.0f));
 	}
 	protected vec3 GetIconColor() override { return vec3(0xDD/255.0f, 0xBB/255.0f, 0x44/255.0f); }
 }
@@ -56,7 +56,7 @@ class SuperSilverMedal : SuperBaseMedal
 	{
 		int stm = SuperMedal::GetScoreAsync(map);
 		int delta = map.TMObjective_AuthorTime - stm;
-		return stm + (delta + 2) / 4;
+		return Math::Round(stm + (delta / 4.0f));
 	}
 	protected vec3 GetIconColor() override { return vec3(0x88/255.0f, 0x99/255.0f, 0x99/255.0f); }
 }
@@ -69,7 +69,7 @@ class SuperBronzeMedal : SuperBaseMedal
 	{
 		int stm = SuperMedal::GetScoreAsync(map);
 		int delta = map.TMObjective_AuthorTime - stm;
-		return stm + (delta + 1) / 2;
+		return Math::Round(stm + (delta / 2.0f));
 	}
 	protected vec3 GetIconColor() override { return vec3(0x99/255.0f, 0x66/255.0f, 0x44/255.0f); }
 }
