@@ -39,7 +39,7 @@ uint64 g_limitMapNameLengthTimeEnd = 0;
 
 void OnKeyPress(bool down, VirtualKey key)
 {
-	if (down && key == windowVisibleKey) {
+	if (down && windowVisibleKeyEnabled && key == windowVisibleKey) {
 		windowVisible = !windowVisible;
 	}
 }
@@ -364,3 +364,4 @@ void Main() {
 		yield();
 	}
 }
+
