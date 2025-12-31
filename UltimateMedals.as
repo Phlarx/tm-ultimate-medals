@@ -335,25 +335,16 @@ void Main() {
 					return false;
 				} else if (sa != -1 && sb == -1) {
 					return true;
+				} else if (sa == sb) {
+					return a.m_defaultOrder < b.m_defaultOrder;
 				}
 
 				switch (g_scoreUnit) {
 					case ScoreUnit::Time:
-						if (sa == sb) {
-							return a.m_defaultOrder < b.m_defaultOrder;
-						}
-						return sa < sb;
-
 					case ScoreUnit::Respawns:
-						if (sa == sb) {
-							return a.m_defaultOrder > b.m_defaultOrder;
-						}
 						return sa < sb;
 
 					case ScoreUnit::Points:
-						if (sa == sb) {
-							return a.m_defaultOrder < b.m_defaultOrder;
-						}
 						return sa >= sb;
 				}
 
