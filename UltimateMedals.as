@@ -181,33 +181,26 @@ void Render() {
 			RenderMapComment(mapComment);
 		}
 
-		int numCols = 2; // name and time columns are always shown
-		if(showMedalIcons) numCols++;
-		if(showPbestDelta) numCols++;
-
-		if(UI::BeginTable("table", numCols, UI::TableFlags::SizingFixedFit | UI::TableFlags::NoSavedSettings)) {
-			if (showMedalIcons) {
-				UI::TableSetupColumn("##Icon");
-			}
+		if (UI::BeginTable("table", 4, UI::TableFlags::SizingFixedFit | UI::TableFlags::NoSavedSettings | UI::TableFlags::Hideable)) {
+			UI::TableSetupColumn("##Icon");
 			UI::TableSetupColumn("Medal");
 
 			int scoreUnitTextWidth = int(Draw::MeasureString(tostring(g_scoreUnit)).x);
 			int deltaTextWidth = int(Draw::MeasureString("Delta").x);
 
 			UI::TableSetupColumn("Score", UI::TableColumnFlags::WidthFixed, Math::Max(scoreUnitTextWidth, tableColumnWidth));
-			if (showPbestDelta) {
-				UI::TableSetupColumn("Delta", UI::TableColumnFlags::WidthFixed, Math::Max(deltaTextWidth, tableColumnWidth));
-			}
+			UI::TableSetupColumn("Delta", UI::TableColumnFlags::WidthFixed, Math::Max(deltaTextWidth, tableColumnWidth));
+
+			UI::TableSetColumnEnabled(0, showMedalIcons);
+			UI::TableSetColumnEnabled(3, showPbestDelta);
 
 			if (showHeader) {
 				UI::TableNextRow();
 
 				UI::PushStyleColor(UI::Col::Text, tableHeaderTextColor);
 
-				if (showMedalIcons) {
-					UI::TableNextColumn();
-					// Medal icon has no header text
-				}
+				UI::TableNextColumn();
+				// Medal icon has no header text
 
 				UI::TableNextColumn();
 				UI::Text("Medal");
@@ -216,11 +209,9 @@ void Render() {
 				UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - scoreUnitTextWidth);
 				UI::Text(tostring(g_scoreUnit));
 
-				if (showPbestDelta) {
-					UI::TableNextColumn();
-					UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - deltaTextWidth);
-					UI::Text("Delta");
-				}
+				UI::TableNextColumn();
+				UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - deltaTextWidth);
+				UI::Text("Delta");
 
 				UI::PopStyleColor();
 			}

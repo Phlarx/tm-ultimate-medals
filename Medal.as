@@ -31,10 +31,8 @@ abstract class Medal
 		@m_better = better;
 		@m_worse = worse;
 
-		if(showMedalIcons) {
-			UI::TableNextColumn();
-			DrawIcon();
-		}
+		UI::TableNextColumn();
+		DrawIcon();
 
 		UI::TableNextColumn();
 		DrawName();
@@ -42,11 +40,9 @@ abstract class Medal
 		UI::TableNextColumn();
 		DrawScore();
 
-		if (showPbestDelta) {
-			UI::TableNextColumn();
-			if (g_personalBest !is this) {
-				DrawDelta(g_personalBest);
-			}
+		UI::TableNextColumn();
+		if (g_personalBest !is this) {
+			DrawDelta(g_personalBest);
 		}
 
 		@m_better = @m_worse = null;
