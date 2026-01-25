@@ -5,7 +5,7 @@ abstract class PersonalBestMedal : Medal
 
 	protected vec3 GetIconColor() override
 	{
-		if (m_better !is null && this.m_cachedScore == m_better.GetCachedScore()) {
+		if (m_better !is null && m_cachedScore == m_better.GetCachedScore()) {
 			return m_better.GetIconColor();
 		}
 		if (m_worse !is null) {
