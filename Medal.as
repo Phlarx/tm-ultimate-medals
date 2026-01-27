@@ -80,7 +80,7 @@ abstract class Medal
 			str = m_cachedScore >= 0 ? tostring(m_cachedScore) : "-";
 			break;
 		}
-		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(str).x);
+		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - UI::MeasureString(str).x);
 		UI::Text(str);
 	}
 
@@ -140,7 +140,7 @@ abstract class Medal
 		}
 
 		UI::PushStyleColor(UI::Col::Text, vec4(color, 1));
-		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - Draw::MeasureString(str).x);
+		UI::SetCursorPosX(UI::GetCursorPos().x + UI::GetContentRegionAvail().x - UI::MeasureString(str).x);
 		UI::Text(str);
 		UI::PopStyleColor();
 	}
