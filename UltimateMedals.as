@@ -111,7 +111,7 @@ void Render() {
 			mapNameText += Text::StripFormatCodes(map.MapInfo.Name);
 
 			if (limitMapNameLength) {
-				vec2 size = Draw::MeasureString(mapNameText);
+				vec2 size = UI::MeasureString(mapNameText);
 
 				const uint64 timeOffsetStart = 1000;
 				const uint64 timeOffsetEnd = 2000;
@@ -191,8 +191,8 @@ void Render() {
 			}
 			UI::TableSetupColumn("Medal");
 
-			int scoreUnitTextWidth = int(Draw::MeasureString(tostring(g_scoreUnit)).x);
-			int deltaTextWidth = int(Draw::MeasureString("Delta").x);
+			int scoreUnitTextWidth = int(UI::MeasureString(tostring(g_scoreUnit)).x);
+			int deltaTextWidth = int(UI::MeasureString("Delta").x);
 
 			UI::TableSetupColumn("Score", UI::TableColumnFlags::WidthFixed, Math::Max(scoreUnitTextWidth, tableColumnWidth));
 			if (showPbestDelta) {
