@@ -83,6 +83,9 @@ int tableColumnWidth = 70;
 [Setting category="Appearance" name="Show map name"]
 bool showMapName = false;
 
+[Setting category="Appearance" if="showMapName" name="Strip formatting from map name"]
+bool showMapNameStrip = true;
+
 [Setting category="Appearance" if="showMapName" name="Limit map name length" description="If the map name is too long, it will automatically scroll to still make it readable."]
 bool limitMapNameLength = true;
 
@@ -91,6 +94,12 @@ int limitMapNameLengthWidth = 275;
 
 [Setting category="Appearance" name="Show map author name"]
 bool showAuthorName = false;
+
+[Setting category="Appearance" if="showAuthorName" name="Show map author name prefix"]
+string showAuthorNamePrefix = "by";
+
+[Setting category="Appearance" if="showAuthorName" name="Strip formatting from map author name"]
+bool showAuthorNameStrip = true;
 
 [Setting category="Appearance" name="Show map comment on hover" description="An 'i' icon will appear next to the map name or author name, if a comment is available."]
 bool showComment = false;

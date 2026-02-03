@@ -108,7 +108,11 @@ void Render() {
 				mapNameText = "#";
 			}
 #endif
-			mapNameText += Text::StripFormatCodes(map.MapInfo.Name);
+			if (showMapNameStrip) {
+				mapNameText += Text::StripFormatCodes(map.MapInfo.Name);
+			} else {
+				mapNameText += Text::OpenplanetFormatCodes(map.MapInfo.Name);
+			}
 
 			if (limitMapNameLength) {
 				vec2 size = UI::MeasureString(mapNameText);
@@ -174,7 +178,16 @@ void Render() {
 		}
 
 		if(showAuthorName) {
-			UI::TextDisabled("by " + Text::StripFormatCodes(map.AuthorNickName));
+			string authorLine = showAuthorNamePrefix;
+			if (authorLine != "") {
+				authorLine += " ";
+			}
+			if (showAuthorNameStrip) {
+				authorLine += Text::StripFormatCodes(map.AuthorNickName);
+			} else {
+				authorLine += Text::OpenplanetFormatCodes(map.AuthorNickName);
+			}
+			UI::TextDisabled(authorLine);
 		}
 
 		if (hasComment && showComment) {
