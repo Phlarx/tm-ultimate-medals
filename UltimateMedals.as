@@ -9,6 +9,7 @@ enum ScoreUnit
 enum GameMode
 {
 	TimeAttack,
+	TimeAttackClone,
 	ClashTime,
 	Follow,
 	Stunt,
@@ -307,6 +308,11 @@ void Main() {
 						} else if (map.MapType == "TrackMania\\TM_Platform") {
 							g_scoreUnit = ScoreUnit::Respawns;
 							g_gameMode = GameMode::Platform;
+#if TMNEXT
+						} else if (map.MapInfo !is null && map.MapInfo.TMObjective_NbClones > 0) {
+							g_scoreUnit = ScoreUnit::Time;
+							g_gameMode = GameMode::TimeAttackClone;
+#endif
 						} else {
 							g_scoreUnit = ScoreUnit::Time;
 							g_gameMode = GameMode::TimeAttack;
